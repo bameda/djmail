@@ -20,10 +20,10 @@ class EmailBackend(base.BaseEmailBackend):
         if self._send_async:
             @core._close_connection_on_finish
             def _send(messages):
-                return core.send_messages(email_messages)
+                return core._send_messages(email_messages)
 
             thread = threading.Thread(target=_send, args=[email_messages])
             thread.start()
             return thread
 
-        return core.send_messages(email_messages)
+        return core._send_messages(email_messages)

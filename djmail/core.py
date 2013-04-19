@@ -27,7 +27,7 @@ def _get_real_backend():
     return get_connection(backend=real_backend_path, fail_silently=True)
 
 
-def send_messages(messages):
+def _send_messages(messages):
     connection = _get_real_backend()
 
     # Create a messages on a database for correct
@@ -57,13 +57,17 @@ def send_messages(messages):
 
 
 def _retry_send_messages():
+    """
+    Function that retry send failed messages.
+    """
+
     max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED)\
                         .filter(retry_count__lte=max_retry_value)\
                         .order_by("-priority", "created_date")[limit:offset]
 
     connection = _get_real_backend()
-    paginator = Paginator(queryset, getattr(settings, "DJMAIL_MAX_BULK_RETRY_SEND", 10))
+    paginator = Paginator(list(queryset), getattr(settings, "DJMAIL_MAX_BULK_RETRY_SEND", 10))
 
     for page_index in paginator.page_range:
         connection.open()
