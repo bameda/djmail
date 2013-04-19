@@ -21,4 +21,10 @@ STATICFILES_DIRS = ()
 SECRET_KEY = 'di!n($kqa3)nd%ikad#kcjpkd^uw*h%*kj=*pm7$vbo6ir7h=l'
 INSTALLED_APPS = (
     'djmail',
+    'djcelery',
 )
+
+import djcelery
+djcelery.setup_loader()
+
+CELERY_ALWAYS_EAGER = True

@@ -57,7 +57,6 @@ class TestEmailSending(TestCase):
         mailmodel = models.Message.objects.get()
         self.assertEqual(mailmodel.status, models.STATUS_FAILED)
 
-
     @override_settings(EMAIL_BACKEND="djmail.backends.default.EmailBackend",
                        DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend",
                        DJMAIL_SEND_ASYNC=True)
@@ -67,6 +66,32 @@ class TestEmailSending(TestCase):
 
         thread = email.send()
         thread.join()
+
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+        mailmodel = models.Message.objects.get()
+        self.assertEqual(mailmodel.status, models.STATUS_FAILED)
+
+    @override_settings(EMAIL_BACKEND="djmail.backends.celery.EmailBackend",
+                       DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_async_send_email_with_celery(self):
+        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
+                             ['to1@example.com', 'to2@example.com'])
+        result = email.send()
+        result.wait()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+
+    @override_settings(EMAIL_BACKEND="djmail.backends.celery.EmailBackend",
+                       DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend")
+    def test_failing_async_send_email_with_celery(self):
+        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
+                             ['to1@example.com', 'to2@example.com'])
+        result = email.send()
+        result.wait()
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
