@@ -10,6 +10,7 @@ from django.db import models
 STATUS_DRAFT = 0
 STATUS_SENT = 1
 STATUS_FAILED = 2
+STATUS_DISCARTED = 3
 
 PRIORITY_LOW = 0
 PRIORITY_STANDARD = 1
@@ -21,6 +22,7 @@ class Message(models.Model):
         (STATUS_DRAFT, "Draft"),
         (STATUS_SENT, "Sent"),
         (STATUS_FAILED, "Failed"),
+        (STATUS_DISCARTED, "Discarted"),
     )
 
     PRIORITY_CHOICES = (
@@ -31,8 +33,8 @@ class Message(models.Model):
 
     uuid = models.CharField(max_length=40, primary_key=True,
                             default=lambda: str(uuid.uuid1()))
-    data = models.TextField(blank=True)
 
+    data = models.TextField(blank=True)
     retry_count = models.SmallIntegerField(default=0)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
     priority = models.SmallIntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_STANDARD)

@@ -5,6 +5,7 @@ import functools
 from django.conf import settings
 from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail import get_connection
+from django.core.paginator import Paginator
 from django.db import connection
 
 from . import models
@@ -27,29 +28,66 @@ def _get_real_backend():
 
 
 def send_messages(messages):
-    _connection = _get_real_backend()
+    connection = _get_real_backend()
 
     # Create a messages on a database for correct
     # tracking of their status.
-    _messages = [models.Message.from_email_message(email_message, save=True)
+    messages = [models.Message.from_email_message(email_message, save=True)
                  for email_message in messages]
 
     # Open connection for send all messages
-    _connection.open()
-    _sended_counter = 0
+    connection.open()
+    sended_counter = 0
 
     for message_model in _messages:
-        _email = message_model.get_email_message()
-        _sended = _connection.send_messages([_email])
+        email = message_model.get_email_message()
+        sended = connection.send_messages([email])
 
-        if _sended == 1:
+        if sended == 1:
             message_model.status = models.STATUS_SENT
             message_model.save()
 
-            _sended_counter += 1
+            sended_counter += 1
         else:
             message_model.status = models.STATUS_FAILED
             message_model.save()
 
-    _connection.close()
-    return _sended_counter
+    connection.close()
+    return sended_counter
+
+
+def _retry_send_messages():
+    max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
+    queryset = models.Message.objects.filter(status=models.STATUS_FAILED)\
+                        .filter(retry_count__lte=max_retry_value)\
+                        .order_by("-priority", "created_date")[limit:offset]
+
+    connection = _get_real_backend()
+    paginator = Paginator(queryset, getattr(settings, "DJMAIL_MAX_BULK_RETRY_SEND", 10))
+
+    for page_index in paginator.page_range:
+        connection.open()
+        for message_model in paginator.page(page_index).object_list:
+            email = message_model.get_email_message()
+            sended = connection.send_messages([email])
+
+            if sended == 1:
+                message_model.status = models.STATUS_SENT
+                message_model.retry_count += 1
+            else:
+                message_model.retry_count += 1
+
+            message_model.save()
+
+        connection.close()
+
+
+def _mark_discarted_messages():
+    """
+    Function that search messaged that exceeds
+    the global retry number and marks its as
+    discarted messages.
+    """
+    queryset = models.Message.objects.filter(status=models.STATUS_FAILED,
+                                             retry_count__gt=max_retry_value)
+    return queryset.update(status=models.STATUS_DISCARTED)
