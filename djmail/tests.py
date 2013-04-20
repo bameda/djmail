@@ -8,7 +8,7 @@ from django.test.utils import override_settings
 
 from . import models
 from . import core
-from .template_mail import TemplateMail
+from .template_mail import TemplateMail, MagicMail
 
 
 class TestEmailSending(TestCase):
@@ -181,3 +181,20 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(m.subject, u'Subject2: foo')
         self.assertEqual(m.body, u"body\n")
         self.assertEqual(m.alternatives, [(u'<b>Body</b>\n', 'text/html')])
+
+    @override_settings(
+        EMAIL_BACKEND="djmail.backends.default.EmailBackend",
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DJMAIL_SEND_ASYNC=False)
+    def test_simple_send_email_with_magic_builder_1(self):
+        mails = MagicMail()
+
+        email = mails.test_email2("to@example.com", {"name": "foo"});
+        email.send()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+        self.assertEqual(email.subject, u'Subject2: foo')
+        self.assertEqual(email.body, u"body\n")
+        self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])

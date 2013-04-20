@@ -3,12 +3,19 @@
 from __future__ import print_function
 
 import functools
+import sys
 
 from django.conf import settings
 from django.core import mail
 from django.utils import translation
 from django.template import loader
 from django.template.base import TemplateDoesNotExist
+
+# Python 3 compatibility
+if sys.version_info[0] == 3:
+    string_types = (str,)
+else:
+    string_types = (str, unicode,)
 
 
 def _get_body_template_prototype():
@@ -129,11 +136,11 @@ class TemplateMail(object):
     def _attach_subject_to_email_instance(self, email, ctx):
         email.subject = self._render_message_subject(ctx)
 
-    def _make_email_object(self, to, ctx):
+    def make_email_object(self, to, ctx, **kwargs):
         if not isinstance(to, (list, tuple)):
             to = [to]
 
-        email = mail.EmailMultiAlternatives()
+        email = mail.EmailMultiAlternatives(**kwargs)
         email.to = to
 
         self._attach_body_to_email_instance(email, ctx)
@@ -141,16 +148,33 @@ class TemplateMail(object):
         return email
 
     def send(self, to, context, **kwargs):
-        email = self._make_email_object(to, context)
+        email = self.make_email_object(to, context, **kwargs)
         return email.send()
 
 
 class MagicMail(object):
-    def __init__(self, email_attr="email", lang_attr="lang"):
+    def __init__(self, email_attr="email", lang_attr="lang", template_mail_cls=TemplateMail):
         self._email_attr = email_attr
         self._lang_attr = lang_attr
+        self._template_mail_cls = template_mail_cls
 
     def __getattr__(self, name):
         def _dynamic_email_generator(to, ctx):
-            template_email = TemplateMail()
-            return template_email._make_email_object(to, ctx)
+            lang = None
+
+            if not isinstance(to, string_types):
+                if not hasattr(to, self._email_attr):
+                    raise AttributeError(
+                        "to object does not "
+                        "have {0} attribute".format(self._email_attr))
+
+                lang = getattr(to, self._lang_attr, None)
+                to = getattr(to, self._email_attr)
+
+            if lang is not None:
+                ctx["lang"] = lang
+
+            template_email = self._template_mail_cls(name=name)
+            return template_email.make_email_object(to, ctx)
+
+        return _dynamic_email_generator
