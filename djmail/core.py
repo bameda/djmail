@@ -27,19 +27,19 @@ def _get_real_backend():
     return get_connection(backend=real_backend_path, fail_silently=True)
 
 
-def _send_messages(messages):
+def _send_messages(email_messages):
     connection = _get_real_backend()
 
     # Create a messages on a database for correct
     # tracking of their status.
     messages = [models.Message.from_email_message(email_message, save=True)
-                 for email_message in messages]
+                 for email_message in email_messages]
 
     # Open connection for send all messages
     connection.open()
     sended_counter = 0
 
-    for message_model in _messages:
+    for message_model in messages:
         email = message_model.get_email_message()
         sended = connection.send_messages([email])
 
@@ -64,7 +64,7 @@ def _retry_send_messages():
     max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED)\
                         .filter(retry_count__lte=max_retry_value)\
-                        .order_by("-priority", "created_date")[limit:offset]
+                        .order_by("-priority", "created_at")
 
     connection = _get_real_backend()
     paginator = Paginator(list(queryset), getattr(settings, "DJMAIL_MAX_BULK_RETRY_SEND", 10))
@@ -88,10 +88,11 @@ def _retry_send_messages():
 
 def _mark_discarted_messages():
     """
-    Function that search messaged that exceeds
-    the global retry number and marks its as
-    discarted messages.
+    Function that search messaged that exceeds the global retry
+    number and marks its as discarted messages.
     """
+
+    max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED,
                                              retry_count__gt=max_retry_value)
     return queryset.update(status=models.STATUS_DISCARTED)

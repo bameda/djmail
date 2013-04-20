@@ -50,7 +50,6 @@ class Message(models.Model):
     def from_email_message(cls, email_message, save=False):
         data = base64.encodestring(pickle.dumps(email_message))
         instance = cls(data=data)
-        instance._email_message = email_message
 
         if save:
             instance.save()

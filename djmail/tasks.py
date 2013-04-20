@@ -17,5 +17,5 @@ def retry_send_messages():
     """
     Celery periodic task for retry send failed messages.
     """
-    core._retry_send_messages()
     core._mark_discarted_messages()
+    core._retry_send_messages()
