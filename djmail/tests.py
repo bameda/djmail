@@ -8,7 +8,7 @@ from django.test.utils import override_settings
 
 from . import models
 from . import core
-from .template_mail import TemplateMail, MagicMail
+from .template_mail import TemplateMail, MagicMailBuilder
 
 
 class TestEmailSending(TestCase):
@@ -187,7 +187,7 @@ class TestTemplateEmailSending(TestCase):
         DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
         DJMAIL_SEND_ASYNC=False)
     def test_simple_send_email_with_magic_builder_1(self):
-        mails = MagicMail()
+        mails = MagicMailBuilder()
 
         email = mails.test_email2("to@example.com", {"name": "foo"});
         email.send()

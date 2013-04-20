@@ -8,8 +8,7 @@ import sys
 from django.conf import settings
 from django.core import mail
 from django.utils import translation
-from django.template import loader
-from django.template.base import TemplateDoesNotExist
+from django.template import loader, TemplateDoesNotExist
 
 # Python 3 compatibility
 if sys.version_info[0] == 3:
@@ -152,8 +151,9 @@ class TemplateMail(object):
         return email.send()
 
 
-class MagicMail(object):
-    def __init__(self, email_attr="email", lang_attr="lang", template_mail_cls=TemplateMail):
+class MagicMailBuilder(object):
+    def __init__(self, email_attr="email", lang_attr="lang",
+                 template_mail_cls=TemplateMail):
         self._email_attr = email_attr
         self._lang_attr = lang_attr
         self._template_mail_cls = template_mail_cls
