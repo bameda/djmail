@@ -10,6 +10,8 @@ from django.core import mail
 from django.utils import translation
 from django.template import loader, TemplateDoesNotExist
 
+from . import models
+
 # Python 3 compatibility
 if sys.version_info[0] == 3:
     string_types = (str,)
@@ -159,7 +161,7 @@ class MagicMailBuilder(object):
         self._template_mail_cls = template_mail_cls
 
     def __getattr__(self, name):
-        def _dynamic_email_generator(to, ctx):
+        def _dynamic_email_generator(to, ctx, priority=models.PRIORITY_STANDARD):
             lang = None
 
             if not isinstance(to, string_types):
@@ -175,6 +177,9 @@ class MagicMailBuilder(object):
                 ctx["lang"] = lang
 
             template_email = self._template_mail_cls(name=name)
-            return template_email.make_email_object(to, ctx)
+            email_instance = template_email.make_email_object(to, ctx)
+            email_instance.priority = priority
+
+            return email_instance
 
         return _dynamic_email_generator
