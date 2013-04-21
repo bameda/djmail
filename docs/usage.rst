@@ -127,6 +127,33 @@ a name of email. Calling this method, returns a native django email instance.
 But it has one feature that TemplateMail does not have, on **to** parameter you
 can pass a model instance that represents a User. This model must have email field.
 
+.. code-block:: python
+
+    class MyUser(models.Model):
+        email = models.CharField(max_length=200)
+        lang = models.CharField(max_length=200, default="es")
+        # [...]
+
+    user = MyUser.objects.get(pk=1)
+    email = mails.some_email(user, {"template": "context"})
+
+
+If you user class has email/lang field with other names, you can customize it
+with some parameters to a constructor of MagicMailBuilder:
+
+.. code-block:: python
+
+    class MyUser(models.Model):
+        personal_email = models.CharField(max_length=200)
+        language = models.CharField(max_length=200, default="es")
+        # [...]
+
+    user = MyUser.objects.get(pk=1)
+
+    mails = template_mail.MagicMailBuilder(email_attr="personal_email"
+                                           lang_attr="language")
+    email = mails.some_email(user, {"template": "context"})
+
 
 I18n
 ^^^^
