@@ -41,10 +41,8 @@ def _get_txt_template_extension():
 
 def _trap_exception(function):
     """
-    Simple decorator for catch template
-    exceptions. If exception is throwed,
-    this decorator by default returns an
-    empty string.
+    Simple decorator for catch template exceptions. If exception is throwed,
+    this decorator by default returns an empty string.
     """
     @functools.wraps(function)
     def _decorator(*args, **kwargs):
@@ -58,11 +56,9 @@ def _trap_exception(function):
 
 def _trap_language(function):
     """
-    Decorator that intercept a language
-    attribute and set it on context of
+    Decorator that intercept a language attribute and set it on context of
     the execution.
     """
-
     @functools.wraps(function)
     def _decorator(self, ctx):
         language_new = None
