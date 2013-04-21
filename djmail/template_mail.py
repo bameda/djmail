@@ -21,22 +21,17 @@ else:
 
 def _get_body_template_prototype():
     return getattr(settings, "DJMAIL_BODY_TEMPLATE_PROTOTYPE",
-                   "email/{name}_body.{ext}")
+                   "email/{name}-body-{type}.{ext}")
 
 
 def _get_subject_template_prototype():
     return getattr(settings, "DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE",
-                   "email/{name}_subject.txt")
+                   "email/{name}-subject.{ext}")
 
 
-def _get_html_template_extension():
-    return getattr(settings, "DJMAIL_HTML_TEMPLATE_EXTENSION",
-                   "html")
+def _get_template_extension():
+    return getattr(settings, "DJMAIL_TEMPLATE_EXTENSION", "html")
 
-
-def _get_txt_template_extension():
-    return getattr(settings, "DJMAIL_TXT_TEMPLATE_EXTENSION",
-                   "txt")
 
 
 def _trap_exception(function):
@@ -96,23 +91,23 @@ class TemplateMail(object):
     @_trap_exception
     @_trap_language
     def _render_message_body_as_html(self, ctx):
-        template_ext = _get_html_template_extension()
+        template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
-            "ext": template_ext, "name": self.name})
+            "ext": template_ext, "name": self.name, "type":"html"})
 
         return loader.render_to_string(template_name, ctx)
 
     @_trap_exception
     @_trap_language
     def _render_message_body_as_txt(self, ctx):
-        template_ext = _get_txt_template_extension()
+        template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
-            "ext": template_ext, "name": self.name})
+            "ext": template_ext, "name": self.name, "type": "text"})
 
         return loader.render_to_string(template_name, ctx)
 
     def _render_message_subject(self, ctx):
-        template_ext = _get_txt_template_extension()
+        template_ext = _get_template_extension()
         template_name = self._subject_template_name.format(**{
             "ext": template_ext, "name": self.name})
 

@@ -37,22 +37,17 @@ Template Mail
 
 Prototype for make body template path.
 
-Default: ``email/{name}_body.{ext}``
+Default: ``email/{name}-body-{type}.{ext}``
 
 **DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE**
 
 Prototype for make subject template path.
 
-Default: ``email/{name}_subject.txt``
+Default: ``email/{name}-subject.{ext}``
 
-**DJMAIL_HTML_TEMPLATE_EXTENSION**
 
-Extension used for html rendering
+**DJMAIL_TEMPLATE_EXTENSION**
+
+Extension used for build a final path of email templates
 
 Default: ``html``
-
-**DJMAIL_TXT_TEMPLATE_EXTENSION**
-
-Extension used for text rendering
-
-Default: ``txt``

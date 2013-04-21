@@ -97,9 +97,9 @@ Example:
 
 As this example, ``TemplateMail`` by default search these templates:
 
-* **emails/some_email_body.html**
-* **emails/some_email_body.txt**
-* **emails/some_email_subject.txt**
+* **emails/some_email-body-html.html**
+* **emails/some_email-body-text.html**
+* **emails/some_email-subject.html**
 
 Text version of email body is omited if template does not exists.
 
