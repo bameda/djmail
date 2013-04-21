@@ -1,7 +1,7 @@
 from setuptools import setup
 
 description = """
-Powerfull django mail middleware.
+Simple, powerfull and nonobstructive django email middleware.
 """
 
 setup(
