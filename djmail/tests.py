@@ -89,7 +89,6 @@ class TestEmailSending(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(models.Message.objects.count(), 1)
 
-
     @override_settings(
         EMAIL_BACKEND="djmail.backends.celery.EmailBackend",
         DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend")
@@ -162,7 +161,6 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(m.subject, u'Subject1: foo')
         self.assertEqual(m.body, u"<b>Mail1: foo</b>\n")
 
-
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
         DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
@@ -198,3 +196,30 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(email.subject, u'Subject2: foo')
         self.assertEqual(email.body, u"body\n")
         self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
+
+
+    @override_settings(
+        EMAIL_BACKEND="djmail.backends.default.EmailBackend",
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DJMAIL_SEND_ASYNC=False)
+    def test_simple_send_email_with_magic_builder_1_with_low_priority(self):
+        mails = MagicMailBuilder()
+
+        email = mails.test_email2("to@example.com", {"name": "foo"}, priority=10);
+        email.send()
+
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+        m1 = models.Message.objects.get()
+        self.assertEqual(m1.status, models.STATUS_PENDING)
+        self.assertEqual(m1.priority, 10)
+
+        core._send_pending_messages()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+        m2 = models.Message.objects.get()
+        self.assertEqual(m2.status, models.STATUS_SENT)
+        self.assertEqual(m2.priority, 10)

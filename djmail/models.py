@@ -6,15 +6,14 @@ import uuid
 
 from django.db import models
 
-
-STATUS_DRAFT = 0
-STATUS_SENT = 1
-STATUS_FAILED = 2
-STATUS_DISCARTED = 3
+STATUS_DRAFT = 10
+STATUS_PENDING = 20
+STATUS_SENT = 30
+STATUS_FAILED = 40
+STATUS_DISCARTED = 50
 
 PRIORITY_LOW = 20
 PRIORITY_STANDARD = 50
-PRIORITY_HIGH = 100
 
 
 class Message(models.Model):
@@ -25,19 +24,13 @@ class Message(models.Model):
         (STATUS_DISCARTED, "Discarted"),
     )
 
-    PRIORITY_CHOICES = (
-        (PRIORITY_LOW, "Low"),
-        (PRIORITY_STANDARD, "Standard"),
-        (PRIORITY_HIGH, "High")
-    )
-
     uuid = models.CharField(max_length=40, primary_key=True,
                             default=lambda: str(uuid.uuid1()))
 
     data = models.TextField(blank=True)
     retry_count = models.SmallIntegerField(default=0)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
-    priority = models.SmallIntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_STANDARD)
+    priority = models.SmallIntegerField(default=PRIORITY_STANDARD)
 
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, default=None)

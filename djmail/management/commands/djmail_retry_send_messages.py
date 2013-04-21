@@ -5,6 +5,7 @@ from djmail import core
 
 class Command(NoArgsCommand):
     def handle_noargs(**options):
+        core._send_pending_messages()
         core._mark_discarted_messages()
         core._retry_send_messages()
 

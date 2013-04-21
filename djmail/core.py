@@ -10,6 +10,7 @@ from django.db import connection
 
 from . import models
 
+
 def _close_connection_on_finish(function):
     @functools.wraps(function)
     def _decorator(*args, **kwargs):
@@ -32,28 +33,60 @@ def _send_messages(email_messages):
 
     # Create a messages on a database for correct
     # tracking of their status.
-    messages = [models.Message.from_email_message(email_message, save=True)
-                 for email_message in email_messages]
+    email_models = [models.Message.from_email_message(email, save=True)
+                    for email in email_messages]
 
     # Open connection for send all messages
     connection.open()
     sended_counter = 0
 
-    for message_model in messages:
-        email = message_model.get_email_message()
+    for email, model_instance in zip(email_messages, email_models):
+        if hasattr(email, "priority"):
+            if email.priority <= models.PRIORITY_LOW:
+                model_instance.priority = email.priority
+                model_instance.status = models.STATUS_PENDING
+                model_instance.save()
+
+                continue
+
         sended = connection.send_messages([email])
 
         if sended == 1:
-            message_model.status = models.STATUS_SENT
-            message_model.save()
-
             sended_counter += 1
+            model_instance.status = models.STATUS_SENT
         else:
-            message_model.status = models.STATUS_FAILED
-            message_model.save()
+            model_instance.status = models.STATUS_FAILED
+
+        model_instance.save()
 
     connection.close()
     return sended_counter
+
+
+def _send_pending_messages():
+    """
+    Function that sends pending, low priority messages.
+    """
+
+    queryset = models.Message.objects.filter(status=models.STATUS_PENDING)\
+                                        .order_by("-priority", "created_at")
+
+    connection = _get_real_backend()
+    paginator = Paginator(list(queryset), getattr(settings, "DJMAIL_MAX_BULK_RETRY_SEND", 10))
+
+    for page_index in paginator.page_range:
+        connection.open()
+        for message_model in paginator.page(page_index).object_list:
+            email = message_model.get_email_message()
+            sended = connection.send_messages([email])
+
+            if sended == 1:
+                message_model.status = models.STATUS_SENT
+            else:
+                message_model.retry_count += 1
+
+            message_model.save()
+        connection.close()
 
 
 def _retry_send_messages():
@@ -77,7 +110,6 @@ def _retry_send_messages():
 
             if sended == 1:
                 message_model.status = models.STATUS_SENT
-                message_model.retry_count += 1
             else:
                 message_model.retry_count += 1
 
