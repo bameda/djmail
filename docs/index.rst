@@ -15,13 +15,13 @@ middleware.
 Introduction
 ------------
 
-djmail consists on theese main notable features:
+djmail consists on this features:
 
-* Can send emails asyncronously and integrates with celery (optional).
-* Can retry send failure messages with system cron or celery periodic tasks.
-* Can assign send priority on a email object.
+* Can send emails asynchronously and integrates with celery (optional).
+* Can retry send failed email messages with crond or celery periodic tasks.
+* Can attach priority to email messages.
 * Incorporates a simple way to build emails from templates.
-* Works transparently. You use a django api as it without modifications.
+* Works transparently. You use a django api as it, without any modifications.
 
 
 User guide
