@@ -19,5 +19,4 @@ djmail consists on theese main notable features:
 Documentation:
 --------------
 
-TODO
-
+https://djmail.readthedocs.org/en/latest/
