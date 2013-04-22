@@ -8,20 +8,20 @@ djmail
 
 Release v\ |version|.
 
-djmail is a :ref:`BSD LIcensed <license>`, simple, powerfull and nonobstructive django email
+djmail is a :ref:`BSD LIcensed <license>`, simple, powerful and nonobstructive django email
 middleware.
 
 
 Introduction
 ------------
 
-djmail consists on this features:
+djmail involves these features:
 
-* Can send emails asynchronously and integrates with celery (optional).
-* Can retry send failed email messages with crond or celery periodic tasks.
-* Can attach priority to email messages.
-* Incorporates a simple way to build emails from templates.
-* Works transparently. You use a django api as it, without any modifications.
+* Can send emails asynchronously (it integrates very well with celery)
+* Can retry send failed email messages (with crond or celery periodic tasks)
+* Can assign deliver priority to a email message.
+* Provides a simple way to build email messages from templates.
+* Works transparently for your or third party code.
 
 
 User guide

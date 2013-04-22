@@ -27,18 +27,16 @@ Configure
 ---------
 
 As first step, configure your email backend settings to one of backends
-that djmail offers, and indicate to djmail thats a real django backend
-to use.
+that djmail offers.
+
+djmail works as middleware, so you must configure the true email backend.
+
+Example initial configuration:
 
 .. code-block:: python
 
     EMAIL_BACKEND="djmail.backends.default.EmailBackend"
     DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
-
-.. note::
-
-   djmail works as a middleware and in background uses a stantard django
-   email backends.
 
 
 For usage examples see :ref:`How to use <usage>`

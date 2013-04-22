@@ -4,128 +4,153 @@
 How to use
 ==========
 
-djmail works as middleware, and basic usage of this not requires any modification of your
-code. Also, it provides some usefull features as:
-
-* render and send emails with templates (with i18n)
-* assign priority.
-
-.. note::
-
-   Email objects with low priority are not sended inmediatelly, instead,
-   are delayed until the next scheduled shipment (with cron or celery)
+djmail works as middleware, and the simpler way to use it, is do nothink, only send
+emails as what did you do before.
 
 
 Email delivery backends
 -----------------------
 
-djmail provides basically two backends: **default** and **celery**.
+djmail provides two backends:
 
-The default backend works in two modes: standard and async. On stantard mode, the email is sended
-inmediatelly in the same thread (in blocking mode) and if its failed, it automatically stored
-on a database with **failed state**.
+* **default**: sends emails on the same process/thread or in other thread.
+* **celery**: sends emails asynchronously with celery tasks.
 
-On async mode, djmail creates a separate thread and send a email on it with same behavior with
-failing messages.
+Default
+^^^^^^^
 
-The celery backend uses celery tasks to send emails and its always send asyncronous. Obviously, with
-same behavior as default backend with failing email messages.
+This backend works in two modes: **standard** or **async**.
 
-.. note::
+The **standard** mode, works very similar as any backend of django, with exception of status tracking
+and failuire scheduling.
 
-    All sended email objects are stored on a database with corresponding state, retry count,
-    priority, etc...
+The **async** mode, do samethink like previos but sends a email in a new thread.
+
+Celery
+^^^^^^
+
+The celery backend uses celery async tasks to send emails and its always send asyncronous. Obviously, with
+same behavior as default.
+
+Example configuration with celery backend:
+
+.. code-block:: python
+
+    EMAIL_BACKEND="djmail.backends.celery.EmailBackend"
+    DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
 
 
 Email retry methods
 -------------------
 
-djmail exposes two methods for delivery failed messages: cron and celery periodic tasks. Each email
-is going to try to deliver as maximum number of retries. For set custom retry number or other settings,
-see :ref:`Settings section <settings>`.
+djmail implements two methods for deliver failed email messages:
 
-If you choice is cron, you need execute this management command every N min/sec:
+* With operating system crond service.
+* With celery periodic tasks.
+
+If you choice is crond, you need execute this management command every N min/sec:
 
 .. code-block:: console
 
     python manage.py djmail_retry_send_messages
 
 
-But if you choice is celery periodic tasks, you need put a new entry on `CELERYBEAT_SCHEDULE`:
+But if you choice is celery periodic tasks, this is a possible example of a configuration:
 
 .. code-block:: python
 
     from datetime import timedelta
 
     CELERYBEAT_SCHEDULE = {
-        'djmail-retry-120-seconds': {
+        'djmail-retry-send-every-120-seconds': {
             'task': 'tasks.retry_send_messages',
             'schedule': timedelta(seconds=120),
         },
     }
 
+Also, you can costumize the maximum number of retry with these settings parameter:
+
+.. code-block:: python
+
+    DJMAIL_MAX_RETRY_NUMBER = 5
+
 
 Render emails with templates
 ----------------------------
 
-djmail exposes two clases for build email objects with templates:
+djmail implements two classes for build emails from templates.
 
-* djmail.template_mail.TemplateMail
-* djmail.template_mail.MagicMailBuilder
+* **djmail.template_mail.TemplateMail**: low lever interface.
+* **djmail.template_mail.MagicMailBuilder**: very powerful and magic interface.
 
 
 TemplateMail
 ^^^^^^^^^^^^
 
-The ``TemplateMail`` is a low level implementation, you can define your own TemplateMail subclases.
+The ``TemplateMail`` is a low level implementation for build emails from templates.
 
-Example:
+This is a simpler example for use it:
 
 .. code-block:: python
 
+    # Define a subclass of TemplateMail
     class SomeTemplateEmail(template_mail.TemplateMail):
         name = "some_email"
 
-    # Usage
+    # Create a instance
     email = SomeTemplateEmail()
+
+    # Buld and sent message with specified context
     email.send("to@example.com", {"template": "context"})
 
+Also you can obtain a native django email instance from TemplateMail instance:
+
+.. code-block:: python
+
+    # Create a instance
+    template_email = SomeTemplateEmail()
+
     # Or obtain a native django email object
-    email = SomeTemplateEmail().make_email_object("to@example.com",
-                                                  {"template": "context"})
+    email = template_email.make_email_object("to@example.com",
+                                             {"template": "context"})
     email.send()
 
-As this example, ``TemplateMail`` by default search these templates:
+
+TemplateMail or a subclass, by default search these templates:
 
 * **emails/some_email-body-html.html**
 * **emails/some_email-body-text.html**
 * **emails/some_email-subject.html**
 
-Text version of email body is omited if template does not exists.
+.. note::
 
-See the :ref:`Settings section <settings>` for costumize this behavior.
+    Text version of email body is omited if template does not exists.
+
+You can change the search pattern with some settings parameters that you
+can see in :ref:`Settings <settings>` section.
 
 
 MagicMailBuilder
 ^^^^^^^^^^^^^^^^
 
-This is a more powerfull usage of this feature. **MagicMailBuilder** delegate a email
-object construction to a **TemplateMail** and exposes more dynamic api.
+This is a more powerful method for building messages from templates. It delegates a email
+building to a TemplateMail buit exposes more easy and dynamic api.
 
 This example represents the same behavior as previos example:
 
 .. code-block:: python
 
+    # Create MagicMailBuilder instance
     mails = template_mail.MagicMailBuilder()
 
+    # Create a native email object.
+    # NOTE: The method name represents a email name.
     email = mails.some_email("to@example.com", {"template": "context"})
     email.send()
 
-MagicMailBuilder instance build dynamicaly a method, whose name represents
-a name of email. Calling this method, returns a native django email instance.
 
-But it has one feature that TemplateMail does not have, on **to** parameter you
-can pass a model instance that represents a User. This model must have email field.
+Additionally, instead of receiver email address you can pass a django model
+instance that represents a user:
 
 .. code-block:: python
 
@@ -141,25 +166,11 @@ can pass a model instance that represents a User. This model must have email fie
 If you user class has email/lang field with other names, you can customize it
 with some parameters to a constructor of MagicMailBuilder:
 
-.. code-block:: python
-
-    class MyUser(models.Model):
-        personal_email = models.CharField(max_length=200)
-        language = models.CharField(max_length=200, default="es")
-        # [...]
-
-    user = MyUser.objects.get(pk=1)
-
-    mails = template_mail.MagicMailBuilder(email_attr="personal_email"
-                                           lang_attr="language")
-    email = mails.some_email(user, {"template": "context"})
-
-
 I18n
 ^^^^
 
-Both api's implements i18n for rendering email body and subject. For activate a
-specific languate you need pass ``lang`` attribute on a context parameter.
+Both previous api's implements i18n for rendering email body and subject. For activate a
+specific languate you must pass ``lang`` attribute on a context parameter.
 
 Example:
 
@@ -168,17 +179,17 @@ Example:
     email = mails.some_email("to@example.com",
                              {"template": "context", "lang": "es"})
 
-Also, if you use a User model instead of email address on a **to** field, if these
-user model contains a **lang** field, djmail use it automatically.
-
-
 Priority
 ^^^^^^^^
 
-The dinamic methods generated by **MagicMailBuilder**, accept **priority** as optional
-keyworkd argument (by default the priorty is 50) with which can specify the priority.
+The dynamic methods generated by **MagicMailBuilder**, accepts **priority** as optional
+keyworkd argument (by default with 50 as priority value)-
 
-Priority lower than 20, not sended inmediatelly.
+.. note::
+
+   Email objects with low priority are not sent immediately, but are nevertheless sending
+   are delayed until the next scheduled delivery process (with cron or celery).
+
 
 .. code-block:: python
 
