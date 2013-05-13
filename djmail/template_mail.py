@@ -21,12 +21,12 @@ else:
 
 def _get_body_template_prototype():
     return getattr(settings, "DJMAIL_BODY_TEMPLATE_PROTOTYPE",
-                   "email/{name}-body-{type}.{ext}")
+                   "emails/{name}-body-{type}.{ext}")
 
 
 def _get_subject_template_prototype():
     return getattr(settings, "DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE",
-                   "email/{name}-subject.{ext}")
+                   "emails/{name}-subject.{ext}")
 
 
 def _get_template_extension():
