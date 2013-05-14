@@ -37,13 +37,13 @@ Template Mail
 
 Prototype for make body template path.
 
-Default: ``email/{name}-body-{type}.{ext}``
+Default: ``emails/{name}-body-{type}.{ext}``
 
 **DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE**
 
 Prototype for make subject template path.
 
-Default: ``email/{name}-subject.{ext}``
+Default: ``emails/{name}-subject.{ext}``
 
 
 **DJMAIL_TEMPLATE_EXTENSION**
