@@ -6,6 +6,7 @@ import uuid
 
 from django.db import models
 
+
 STATUS_DRAFT = 10
 STATUS_PENDING = 20
 STATUS_SENT = 30
