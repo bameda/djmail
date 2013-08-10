@@ -7,6 +7,7 @@ from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail import get_connection
 from django.core.paginator import Paginator
 from django.db import connection
+from django.utils import timezone
 
 from . import models
 
@@ -54,6 +55,7 @@ def _send_messages(email_messages):
         if sended == 1:
             sended_counter += 1
             model_instance.status = models.STATUS_SENT
+            model_instance.sent_at = timezone.now()
         else:
             model_instance.status = models.STATUS_FAILED
 
@@ -82,6 +84,7 @@ def _send_pending_messages():
 
             if sended == 1:
                 message_model.status = models.STATUS_SENT
+                message_model.sent_at = timezone.now()
             else:
                 message_model.retry_count += 1
 
@@ -110,6 +113,7 @@ def _retry_send_messages():
 
             if sended == 1:
                 message_model.status = models.STATUS_SENT
+                message_model.sent_at = timezone.now()
             else:
                 message_model.retry_count += 1
 
