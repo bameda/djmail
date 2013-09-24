@@ -9,7 +9,7 @@ from djmail import core
 
 class EmailBackend(base.BaseEmailBackend):
     def _load_settings(self):
-        self._send_async = getattr(settings, "DJMAIL_SEND_ASYNC", True)
+        self._send_async = getattr(settings, "DJMAIL_SEND_ASYNC", False)
 
     def _send_messages(self, email_messages):
         if len(email_messages) == 0:
