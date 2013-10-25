@@ -118,12 +118,11 @@ class TemplateMail(object):
         body_html = self._render_message_body_as_html(ctx)
         body_txt = self._render_message_body_as_txt(ctx)
 
-        if (isinstance(email, mail.EmailMultiAlternatives)
-                and body_txt and body_html):
+        if isinstance(email, mail.EmailMultiAlternatives):
             email.body = body_txt
             email.attach_alternative(body_html, "text/html")
         else:
-            email.body = body_html
+            email.body = body_txt
 
     def _attach_subject_to_email_instance(self, email, ctx):
         email.subject = self._render_message_subject(ctx)
