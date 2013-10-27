@@ -9,7 +9,7 @@ setup(
     url = "https://github.com/niwibe/djmail",
     author = "Andrey Antukh",
     author_email = "niwi@niwi.be",
-    version='0.3',
+    version='0.4',
     packages = [
         "djmail",
         "djmail.backends",
@@ -23,7 +23,8 @@ setup(
         '': ['*.html'],
     },
     classifiers = [
-        "Development Status :: 5 - Production/Stable",
+        # "Development Status :: 5 - Production/Stable",
+        "Development Status :: 4 - Beta",
         "Operating System :: OS Independent",
         "Environment :: Web Environment",
         "Framework :: Django",
