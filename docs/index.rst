@@ -8,7 +8,7 @@ djmail
 
 Release v\ |version|.
 
-djmail is a :ref:`BSD LIcensed <license>`, simple, powerful and nonobstructive django email
+djmail is a :ref:`BSD Licensed <license>`, simple, powerful and nonobstructive django email
 middleware.
 
 
