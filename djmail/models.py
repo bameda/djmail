@@ -28,13 +28,14 @@ class Message(models.Model):
     uuid = models.CharField(max_length=40, primary_key=True,
                             default=lambda: str(uuid.uuid1()))
 
-    data = models.TextField(blank=True)
-    retry_count = models.SmallIntegerField(default=0)
+    data = models.TextField(blank=True, editable=False)
+    retry_count = models.SmallIntegerField(default=-1)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
     priority = models.SmallIntegerField(default=PRIORITY_STANDARD)
 
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, default=None)
+    exception = models.TextField(editable=True, blank=True)
 
     def get_email_message(self):
         raw_pickle_data = base64.decodestring(self.data)
@@ -49,3 +50,9 @@ class Message(models.Model):
             instance.save()
 
         return instance
+
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = "Message"
+        verbose_name_plural = "Messages"

@@ -33,7 +33,6 @@ def _get_template_extension():
     return getattr(settings, "DJMAIL_TEMPLATE_EXTENSION", "html")
 
 
-
 def _trap_exception(function):
     """
     Simple decorator for catch template exceptions. If exception is throwed,

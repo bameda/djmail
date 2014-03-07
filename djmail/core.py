@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import functools
+import io
 
 from django.conf import settings
 from django.core.mail.backends.smtp import EmailBackend
@@ -12,22 +13,49 @@ from django.utils import timezone
 from . import models
 
 
-def _close_connection_on_finish(function):
-    @functools.wraps(function)
-    def _decorator(*args, **kwargs):
+def _chunked_iterate_queryset(queryset, chunk_size=10):
+    """
+    Given a queryset, use paginator for iterate over all queryset
+    but obtaining from database delimeted set of result parametrized
+    with `chunk_size` parameter.
+    """
+    paginator = Paginator(queryset, chunk_size)
+    for page_index in page_index.page_index:
+        page = paginator.page(page_index)
+        for item in page.object_list:
+            yield item
+
+def _safe_send_message(message_model, connection):
+    """
+    Given a message model, try send it, if send process
+    is fail, increment retry count and save stack trace
+    in message model.
+    """
+    email = message_model.get_email_message()
+    sended = 0
+
+    with io.StringIO() as file:
         try:
-            return function(*args, **kwargs)
-        finally:
-            connection.close()
+            sended = connection.send_messages([email])
+        except Exception as e:
+            traceback.print_exc(file=file)
+            file.seek(0)
+            message_model.exception = file.read()
+        else:
+            if sended == 1:
+                message_model.status = models.STATUS_SENT
+                message_model.sent_at = timezone.now()
+            else:
+                message_model.status = models.STATUS_FAILED
+                message_model.retry_count += 1
 
-    return _decorator
-
+        message_model.save()
+        return sended
 
 def _get_real_backend():
     real_backend_path = getattr(settings, "DJMAIL_REAL_BACKEND",
                            'django.core.mail.backends.console.EmailBackend')
-    return get_connection(backend=real_backend_path, fail_silently=True)
-
+    return get_connection(backend=real_backend_path, fail_silently=False)
 
 def _send_messages(email_messages):
     connection = _get_real_backend()
@@ -39,92 +67,62 @@ def _send_messages(email_messages):
 
     # Open connection for send all messages
     connection.open()
-    sended_counter = 0
 
+    sended_counter = 0
     for email, model_instance in zip(email_messages, email_models):
         if hasattr(email, "priority"):
             if email.priority <= models.PRIORITY_LOW:
                 model_instance.priority = email.priority
                 model_instance.status = models.STATUS_PENDING
                 model_instance.save()
-
+                sended_counter += 1
                 continue
 
-        sended = connection.send_messages([email])
-
-        if sended == 1:
-            sended_counter += 1
-            model_instance.status = models.STATUS_SENT
-            model_instance.sent_at = timezone.now()
-        else:
-            model_instance.status = models.STATUS_FAILED
-
-        model_instance.save()
+        sended_counter += _safe_send_message(email, connection)
 
     connection.close()
     return sended_counter
-
 
 def _send_pending_messages():
     """
     Function that sends pending, low priority messages.
     """
-
+    max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_PENDING)\
-                                        .order_by("-priority", "created_at")
-
+                                     .order_by("-priority", "created_at")
     connection = _get_real_backend()
-    paginator = Paginator(list(queryset), getattr(settings, "DJMAIL_MAX_BULK_RETRY_SEND", 10))
+    connection.open()
 
-    for page_index in paginator.page_range:
-        connection.open()
-        for message_model in paginator.page(page_index).object_list:
-            email = message_model.get_email_message()
-            sended = connection.send_messages([email])
+    sended_counter = 0
+    for message_model in _chunked_iterate_queryset(queryset, 100):
+        # Use one unique connection for send all messages
+        sended_counter += _safe_send_message(message_model, connection)
 
-            if sended == 1:
-                message_model.status = models.STATUS_SENT
-                message_model.sent_at = timezone.now()
-            else:
-                message_model.retry_count += 1
-
-            message_model.save()
-        connection.close()
-
+    connection.close()
+    return sended_counter
 
 def _retry_send_messages():
     """
     Function that retry send failed messages.
     """
-
     max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED)\
-                        .filter(retry_count__lte=max_retry_value)\
-                        .order_by("-priority", "created_at")
+                                     .filter(retry_count__lte=max_retry_value)\
+                                     .order_by("-priority", "created_at")
 
     connection = _get_real_backend()
-    paginator = Paginator(list(queryset), getattr(settings, "DJMAIL_MAX_BULK_RETRY_SEND", 10))
+    connection.open()
 
-    for page_index in paginator.page_range:
-        connection.open()
-        for message_model in paginator.page(page_index).object_list:
-            email = message_model.get_email_message()
-            sended = connection.send_messages([email])
+    sended_counter = 0
+    for message_model in _chunked_iterate_queryset(queryset, 100):
+        sended_counter += _safe_send_message(message_model, connection)
 
-            if sended == 1:
-                message_model.status = models.STATUS_SENT
-                message_model.sent_at = timezone.now()
-            else:
-                message_model.retry_count += 1
-
-            message_model.save()
-
-        connection.close()
-
+    connection.close()
+    return sended_counter
 
 def _mark_discarted_messages():
     """
-    Function that search messaged that exceeds the global retry
+    Function that search messaged that exceds the global retry
     number and marks its as discarted messages.
     """
 
