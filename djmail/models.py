@@ -4,6 +4,7 @@ import base64
 import pickle
 import uuid
 
+from django.utils.encoding import force_bytes
 from django.db import models
 
 
@@ -38,7 +39,7 @@ class Message(models.Model):
     exception = models.TextField(editable=True, blank=True)
 
     def get_email_message(self):
-        raw_pickle_data = base64.decodestring(self.data)
+        raw_pickle_data = base64.decodestring(force_bytes(self.data))
         return pickle.loads(raw_pickle_data)
 
     @classmethod

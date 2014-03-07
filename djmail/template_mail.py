@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import functools
+import traceback
 import sys
 
 from django.conf import settings
@@ -152,6 +153,7 @@ class MagicMailBuilder(object):
     def __getattr__(self, name):
         def _dynamic_email_generator(to, ctx, priority=models.PRIORITY_STANDARD):
             lang = None
+            to = None
 
             if not isinstance(to, string_types):
                 if not hasattr(to, self._email_attr):

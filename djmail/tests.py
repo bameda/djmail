@@ -159,7 +159,7 @@ class TestTemplateEmailSending(TestCase):
 
         m = mail.outbox[0]
         self.assertEqual(m.subject, u'Subject1: foo')
-        self.assertEqual(m.body, u"<b>Mail1: foo</b>\n")
+        self.assertEqual(m.alternatives[0][0], u"<b>Mail1: foo</b>\n")
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
@@ -210,6 +210,7 @@ class TestTemplateEmailSending(TestCase):
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
+
 
         m1 = models.Message.objects.get()
         self.assertEqual(m1.status, models.STATUS_PENDING)

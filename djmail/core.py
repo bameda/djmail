@@ -20,7 +20,7 @@ def _chunked_iterate_queryset(queryset, chunk_size=10):
     with `chunk_size` parameter.
     """
     paginator = Paginator(queryset, chunk_size)
-    for page_index in page_index.page_index:
+    for page_index in paginator.page_range:
         page = paginator.page(page_index)
         for item in page.object_list:
             yield item
@@ -78,7 +78,7 @@ def _send_messages(email_messages):
                 sended_counter += 1
                 continue
 
-        sended_counter += _safe_send_message(email, connection)
+        sended_counter += _safe_send_message(model_instance, connection)
 
     connection.close()
     return sended_counter
