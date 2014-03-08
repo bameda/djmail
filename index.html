@@ -213,10 +213,9 @@ usage:</p></div>
 <div class="sect2">
 <h3 id="_magicmailbuilder">4.2. MagicMailBuilder</h3>
 <div class="paragraph"><p>This is a more powerful way for build email messages from templates. Behind the scene, it uses
-<span class="monospaced">TemplateMail</span> implementation but exposes a dynamic api that allows build subclases of <span class="monospaced">TemplateMail</span>
-on demand.</p></div>
+<span class="monospaced">TemplateMail</span> implementation but exposes a dynamic api that allows build subclases on demand.</p></div>
 <div class="listingblock">
-<div class="title">Example that represents the same behavior as previous example using <span class="monospaced">TemplateMail</span> but using dynamic api of <span class="monospaced">MagicMailBuilder</span></div>
+<div class="title">Example that represents the same behavior as previous example using dynamic api of <span class="monospaced">MagicMailBuilder</span></div>
 <div class="content"><div class="highlight"><pre><span class="c"># Create MagicMailBuilder instance</span>
 <span class="n">mails</span> <span class="o">=</span> <span class="n">template_mail</span><span class="o">.</span><span class="n">MagicMailBuilder</span><span class="p">()</span>
 
@@ -250,10 +249,53 @@ for render email in user locale.</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="license">5. License</h2>
+<h2 id="_settings">5. Settings</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>djmail exposes some additional settings for costumize a great part of default behavior.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>DJMAIL_REAL_BACKEND</strong><br>
+  Indicates to djmail which a real email backend use for deliver email messages.<br>
+  Default: <span class="monospaced">django.core.mail.backends.console.EmailBackend</span>
+</p>
+</li>
+<li>
+<p>
+<strong>DJMAIL_MAX_RETRY_NUMBER</strong><br>
+  Set a default maximum retry number for deliver failed messages.<br>
+  Default: 3
+</p>
+</li>
+<li>
+<p>
+<strong>DJMAIL_BODY_TEMPLATE_PROTOTYPE</strong><br>
+  Prototype for make body template path.<br>
+  Default: <span class="monospaced">emails/{name}-body-{type}.{ext}</span>
+</p>
+</li>
+<li>
+<p>
+<strong>DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE</strong><br>
+  Prototype for make subject template path.<br>
+  Default: <span class="monospaced">emails/{name}-subject.{ext}</span>
+</p>
+</li>
+<li>
+<p>
+<strong>DJMAIL_TEMPLATE_EXTENSION</strong><br>
+  Extension used for build a final path of email templates.<br>
+  Default: <span class="monospaced">html</span>
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="license">6. License</h2>
 <div class="sectionbody">
 <div class="listingblock">
-<div class="content"><div class="highlight"><pre>Copyright (c) 2011-2014 Andrei Antoukh &lt;niwi@niwi.be&gt;
+<div class="content"><div class="highlight"><pre>Copyright (c) 2013-2014 Andrey Antukh &lt;niwi@niwi.be&gt;
 
 All rights reserved.
 
@@ -286,7 +328,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <div id="footer">
 <div id="footer-text">
 Version 0.5.0<br>
-Last updated 2014-03-08 19:01:59 CET
+Last updated 2014-03-08 19:16:28 CET
 </div>
 </div>
 </body>
