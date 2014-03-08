@@ -1,2 +1,7 @@
 *.pyc
 .*swp
+doc/index.html
+dist*
+*.swp
+\#*
+.\#*

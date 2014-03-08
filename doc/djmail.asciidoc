@@ -1,0 +1,203 @@
+djmail documentation
+====================
+Andrey Antukh, <niwi@niwi.be>
+0.5.0, 2014-03-08
+
+:toc:
+:numbered:
+
+
+Introduction
+------------
+
+_djmail_ is a xref:license[BSD Licensed], simple and nonobstructive django email middleware.
+
+
+Why use djmail?
+---------------
+
+Because it:
+
+- Sends email asynchronously without additional libraries.
+- Sends email using celery tasks.
+- Can retry send failed messages (with cron task or celery periodic task).
+- Can assign deliver priority.
+- Has powerfull way to build emails from templates.
+- Works transparently (works as middleware for native django email backends)
+
+
+How to install?
+~~~~~~~~~~~~~~~
+
+The simple way to get djmail for your project, is installing it using *pip*:
+
+[source,text]
+----
+pip install djmail
+----
+
+User guide
+----------
+
+As I have mentioned previously, _djmail_ works as middleware.
+
+- It saves emails using django orm and track it status. If one exception is raised during sending,
+  it marks email as *failed* and stores the exception traceback for posterior analisys.
+- Exposes usefull commands and methods for retry send failed messages.
+- Handles priority, with ability to delay send messages to periodic task (with cron or celery)
+  with lowest priorty.
+
+For get djmail working on your project, you should configure it:
+
+.Example initial development configuration:
+[source,python]
+----
+EMAIL_BACKEND="djmail.backends.default.EmailBackend"
+DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
+----
+
+This specifies: emails are managed by djmail default backend and sended using
+console based django builtin backend.
+
+How to use?
+~~~~~~~~~~~
+
+djmail works as middleware, and the simpler way to use it, is do nothink, only send
+emails as what did you do before.
+
+
+Backends
+~~~~~~~~
+
+_djmail_ comes with three backends:
+
+- *djmail.backends.default.EmailBackend* +
+  send emails synchronously using real backend.
+- *djmail.backends.async.EmailBackend* +
+  send emails asynchronously using `concurrent.futures`.
+- *djmail.backends.celery.EmailBackend* +
+  send emails asynchronously using celery tasks.
+
+
+
+
+Template Emails
+---------------
+
+_djmail_ comes with some utils for easy build emails from templates:
+
+- *djmail.template_mail.TemplateMail*: low level interface.
+- *djmail.template_mail.MagicMailBuilder*: high level interface with some magic.
+
+
+TemplateMail
+~~~~~~~~~~~~
+
+Is a low level interface for buid emails using templates. It allows statically define email classes for posterior
+usage:
+
+[source,python]
+----
+# Define a subclass of TemplateMail
+class SomeTemplateEmail(template_mail.TemplateMail):
+    name = "some_email"
+
+# Create a instance
+email = SomeTemplateEmail()
+
+# Buld and sent message with specified context
+email.send("to@example.com", {"template": "context"})
+----
+
+If you want obtain django native Email instance:
+
+[source, python]
+----
+# Create a instance
+template_email = SomeTemplateEmail()
+
+# Or obtain a native django email object
+email = template_email.make_email_object("to@example.com",
+                                         {"template": "context"})
+email.send()
+----
+
+`TemplateMail` default implementation searches these templates:
+
+- `emails/some_email-body-html.html`
+- `emails/some_email-body-text.html`
+- `emails/some_email-subject.html`
+
+NOTE: Text version of email is ommited if template does not exists.
+
+
+MagicMailBuilder
+~~~~~~~~~~~~~~~~
+
+This is a more powerful way for build email messages from templates. Behind the scene, it uses
+`TemplateMail` implementation but exposes a dynamic api that allows build subclases of `TemplateMail`
+on demand.
+
+.Example that represents the same behavior as previous example using `TemplateMail` but using dynamic api of `MagicMailBuilder`
+[source,python]
+----
+# Create MagicMailBuilder instance
+mails = template_mail.MagicMailBuilder()
+
+# Create a native email object.
+# NOTE: The method name represents a email name.
+email = mails.some_email("to@example.com", {"template": "context"})
+email.send()
+----
+
+Additionally, instead of receiver email address you can pass a django model
+instance that represents a user (it should have "email" field for work):
+
+[source,python]
+----
+class MyUser(models.Model):
+    email = models.CharField(max_length=200)
+    lang = models.CharField(max_length=200, default="es")
+    # [...]
+
+user = MyUser.objects.get(pk=1)
+email = mails.some_email(user, {"template": "context"})
+----
+
+Magic builder is really magic, and if your user has lang field, magic builder uses it to setup a correct user language
+for render email in user locale.
+
+NOTE: Also, you can specify a custom "lang" on context for same purpose.
+
+[[license]]
+License
+-------
+
+[source,text]
+----
+Copyright (c) 2011-2014 Andrei Antoukh <niwi@niwi.be>
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. The name of the author may not be used to endorse or promote products
+   derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+----
