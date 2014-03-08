@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="generator" content="AsciiDoc 8.6.9">
+<title>djmail documentation</title>
+<link rel="stylesheet" href="static/niwi.css" type="text/css">
+<link rel="stylesheet" href="static/pygments.css" type="text/css">
+
+
+<script type="text/javascript" src="static/asciidoc.js"></script>
+<script type="text/javascript" src="static/niwi.js"></script>
+<script type="text/javascript">
+/*<![CDATA[*/
+asciidoc.install(2);
+/*]]>*/
+</script>
+</head>
+<body class="article" style="max-width:800px">
+<div id="header">
+<h1>djmail documentation</h1>
+<span id="author">Andrey Antukh,</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:niwi@niwi.be">niwi@niwi.be</a>&gt;</span><br>
+<span id="revnumber">version 0.5.0,</span>
+<span id="revdate">2014-03-08</span>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><em>djmail</em> is a <a href="#license">BSD Licensed</a>, simple and nonobstructive django email middleware.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_why_use_djmail">2. Why use djmail?</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Because it:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Sends email asynchronously without additional libraries.
+</p>
+</li>
+<li>
+<p>
+Sends email using celery tasks.
+</p>
+</li>
+<li>
+<p>
+Can retry send failed messages (with cron task or celery periodic task).
+</p>
+</li>
+<li>
+<p>
+Can assign deliver priority.
+</p>
+</li>
+<li>
+<p>
+Has powerfull way to build emails from templates.
+</p>
+</li>
+<li>
+<p>
+Works transparently (works as middleware for native django email backends)
+</p>
+</li>
+</ul></div>
+<div class="sect2">
+<h3 id="_how_to_install">2.1. How to install?</h3>
+<div class="paragraph"><p>The simple way to get djmail for your project, is installing it using <strong>pip</strong>:</p></div>
+<div class="listingblock">
+<div class="content"><div class="highlight"><pre>pip install djmail
+</pre></div></div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_user_guide">3. User guide</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>As I have mentioned previously, <em>djmail</em> works as middleware.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+It saves emails using django orm and track it status. If one exception is raised during sending,
+  it marks email as <strong>failed</strong> and stores the exception traceback for posterior analisys.
+</p>
+</li>
+<li>
+<p>
+Exposes usefull commands and methods for retry send failed messages.
+</p>
+</li>
+<li>
+<p>
+Handles priority, with ability to delay send messages to periodic task (with cron or celery)
+  with lowest priorty.
+</p>
+</li>
+</ul></div>
+<div class="sect2">
+<h3 id="_configure">3.1. Configure</h3>
+<div class="sect3">
+<h4 id="_first_steps">3.1.1. First steps</h4>
+<div class="paragraph"><p>For get djmail working on your project, you should configure it.</p></div>
+<div class="listingblock">
+<div class="title">Example initial development configuration:</div>
+<div class="content"><div class="highlight"><pre><span class="n">EMAIL_BACKEND</span><span class="o">=</span><span class="s">&quot;djmail.backends.default.EmailBackend&quot;</span>
+<span class="n">DJMAIL_REAL_BACKEND</span><span class="o">=</span><span class="s">&quot;django.core.mail.backends.console.EmailBackend&quot;</span>
+</pre></div></div></div>
+<div class="paragraph"><p>This specifies: emails are managed by djmail default backend and sended using
+console based django builtin backend.</p></div>
+</div>
+<div class="sect3">
+<h4 id="_backends">3.1.2. Backends</h4>
+<div class="paragraph"><p><em>djmail</em> comes with three backends:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>djmail.backends.default.EmailBackend</strong><br>
+  send emails synchronously using real backend.
+</p>
+</li>
+<li>
+<p>
+<strong>djmail.backends.async.EmailBackend</strong><br>
+  send emails asynchronously using <span class="monospaced">concurrent.futures</span>.
+</p>
+</li>
+<li>
+<p>
+<strong>djmail.backends.celery.EmailBackend</strong><br>
+  send emails asynchronously using celery tasks.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_template_emails">4. Template Emails</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><em>djmail</em> comes with some utils for easy build emails from templates:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<strong>djmail.template_mail.TemplateMail</strong>: low level interface.
+</p>
+</li>
+<li>
+<p>
+<strong>djmail.template_mail.MagiMailBuilder</strong>: high level interface with some magic.
+</p>
+</li>
+</ul></div>
+<div class="sect2">
+<h3 id="_templatemail">4.1. TemplateMail</h3>
+<div class="paragraph"><p>Is a low level interface for buid emails using templates. It allows statically define email classes for posterior
+usage:</p></div>
+<div class="listingblock">
+<div class="content"><div class="highlight"><pre><span class="c"># Define a subclass of TemplateMail</span>
+<span class="k">class</span> <span class="nc">SomeTemplateEmail</span><span class="p">(</span><span class="n">template_mail</span><span class="o">.</span><span class="n">TemplateMail</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;some_email&quot;</span>
+
+<span class="c"># Create a instance</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">SomeTemplateEmail</span><span class="p">()</span>
+
+<span class="c"># Buld and sent message with specified context</span>
+<span class="n">email</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s">&quot;to@example.com&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;template&quot;</span><span class="p">:</span> <span class="s">&quot;context&quot;</span><span class="p">})</span>
+</pre></div></div></div>
+<div class="paragraph"><p>If you want obtain django native Email instance:</p></div>
+<div class="listingblock">
+<div class="content"><div class="highlight"><pre><span class="c"># Create a instance</span>
+<span class="n">template_email</span> <span class="o">=</span> <span class="n">SomeTemplateEmail</span><span class="p">()</span>
+
+<span class="c"># Or obtain a native django email object</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">template_email</span><span class="o">.</span><span class="n">make_email_object</span><span class="p">(</span><span class="s">&quot;to@example.com&quot;</span><span class="p">,</span>
+                                         <span class="p">{</span><span class="s">&quot;template&quot;</span><span class="p">:</span> <span class="s">&quot;context&quot;</span><span class="p">})</span>
+<span class="n">email</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+</pre></div></div></div>
+<div class="paragraph"><p><span class="monospaced">TemplateMail</span> default implementation searches these templates:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">emails/some_email-body-html.html</span>
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">emails/some_email-body-text.html</span>
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">emails/some_email-subject.html</span>
+</p>
+</li>
+</ul></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Text version of email is ommited if template does not exists.</td>
+</tr></table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_magimailbuilder">4.2. MagiMailBuilder</h3>
+<div class="paragraph"><p>This is a more powerful way for build email messages from templates. Behind the scene, it uses
+<span class="monospaced">TemplateMail</span> implementation but exposes a dynamic api that allows build subclases of <span class="monospaced">TemplateMail</span>
+on demand.</p></div>
+<div class="listingblock">
+<div class="title">Example that represents the same behavior as previous example using <span class="monospaced">TemplateMail</span> but using dynamic api of <span class="monospaced">MagiMailBuilder</span></div>
+<div class="content"><div class="highlight"><pre><span class="c"># Create MagicMailBuilder instance</span>
+<span class="n">mails</span> <span class="o">=</span> <span class="n">template_mail</span><span class="o">.</span><span class="n">MagicMailBuilder</span><span class="p">()</span>
+
+<span class="c"># Create a native email object.</span>
+<span class="c"># NOTE: The method name represents a email name.</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">mails</span><span class="o">.</span><span class="n">some_email</span><span class="p">(</span><span class="s">&quot;to@example.com&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;template&quot;</span><span class="p">:</span> <span class="s">&quot;context&quot;</span><span class="p">})</span>
+<span class="n">email</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+</pre></div></div></div>
+<div class="paragraph"><p>Additionally, instead of receiver email address you can pass a django model
+instance that represents a user (it should have "email" field for work):</p></div>
+<div class="listingblock">
+<div class="content"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyUser</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">lang</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&quot;es&quot;</span><span class="p">)</span>
+    <span class="c"># [...]</span>
+
+<span class="n">user</span> <span class="o">=</span> <span class="n">MyUser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">mails</span><span class="o">.</span><span class="n">some_email</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="p">{</span><span class="s">&quot;template&quot;</span><span class="p">:</span> <span class="s">&quot;context&quot;</span><span class="p">})</span>
+</pre></div></div></div>
+<div class="paragraph"><p>Magic builder is really magic, and if your user has lang field, magic builder uses it to setup a correct user language
+for render email in user locale.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Also, you can specify a custom "lang" on context for same purpose.</td>
+</tr></table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="license">5. License</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content"><div class="highlight"><pre>Copyright (c) 2011-2014 Andrei Antoukh &lt;niwi@niwi.be&gt;
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. The name of the author may not be used to endorse or promote products
+   derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS&#39;&#39; AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</pre></div></div></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr></div>
+<div id="footer">
+<div id="footer-text">
+Version 0.5.0<br>
+Last updated 2014-03-08 18:39:09 CET
+</div>
+</div>
+</body>
+</html>
