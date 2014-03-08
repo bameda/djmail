@@ -135,10 +135,9 @@ MagicMailBuilder
 ~~~~~~~~~~~~~~~~
 
 This is a more powerful way for build email messages from templates. Behind the scene, it uses
-`TemplateMail` implementation but exposes a dynamic api that allows build subclases of `TemplateMail`
-on demand.
+`TemplateMail` implementation but exposes a dynamic api that allows build subclases on demand.
 
-.Example that represents the same behavior as previous example using `TemplateMail` but using dynamic api of `MagicMailBuilder`
+.Example that represents the same behavior as previous example using dynamic api of `MagicMailBuilder`
 [source,python]
 ----
 # Create MagicMailBuilder instance
