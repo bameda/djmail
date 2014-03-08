@@ -8,16 +8,10 @@ import sys
 
 from django.conf import settings
 from django.core import mail
-from django.utils import translation
+from django.utils import translation, six
 from django.template import loader, TemplateDoesNotExist
 
 from . import models
-
-# Python 3 compatibility
-if sys.version_info[0] == 3:
-    string_types = (str,)
-else:
-    string_types = (str, unicode,)
 
 
 def _get_body_template_prototype():
@@ -153,13 +147,12 @@ class MagicMailBuilder(object):
     def __getattr__(self, name):
         def _dynamic_email_generator(to, ctx, priority=models.PRIORITY_STANDARD):
             lang = None
-            to = None
 
-            if not isinstance(to, string_types):
+            if not isinstance(to, six.string_types):
                 if not hasattr(to, self._email_attr):
                     raise AttributeError(
-                        "to object does not "
-                        "have {0} attribute".format(self._email_attr))
+                        "'to' parameter does not "
+                        "have '{0}' attribute".format(self._email_attr))
 
                 lang = getattr(to, self._lang_attr, None)
                 to = getattr(to, self._email_attr)

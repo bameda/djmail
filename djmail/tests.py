@@ -17,8 +17,7 @@ class TestEmailSending(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
-        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        DJMAIL_SEND_ASYNC=False)
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_simple_send_email(self):
         email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
                              ['to1@example.com', 'to2@example.com'])
@@ -28,7 +27,7 @@ class TestEmailSending(TestCase):
         self.assertEqual(models.Message.objects.count(), 1)
 
     @override_settings(
-        EMAIL_BACKEND="djmail.backends.default.EmailBackend",
+        EMAIL_BACKEND="djmail.backends.async.EmailBackend",
         DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
         DJMAIL_SEND_ASYNC=True)
     def test_async_send_email(self):
@@ -37,16 +36,15 @@ class TestEmailSending(TestCase):
         # If async is activated, send method
         # returns a thread instead of a number of
         # sent messages.
-        thread = email.send()
-        thread.join()
+        future = email.send()
+        result = future.result()
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(models.Message.objects.count(), 1)
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
-        DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend",
-        DJMAIL_SEND_ASYNC=False)
+        DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend")
     def test_failing_simple_send_email(self):
         email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
                              ['to1@example.com', 'to2@example.com'])
@@ -61,15 +59,14 @@ class TestEmailSending(TestCase):
         self.assertEqual(mailmodel.status, models.STATUS_FAILED)
 
     @override_settings(
-        EMAIL_BACKEND="djmail.backends.default.EmailBackend",
-        DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend",
-        DJMAIL_SEND_ASYNC=True)
+        EMAIL_BACKEND="djmail.backends.async.EmailBackend",
+        DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend")
     def test_failing_async_send_email(self):
         email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
                              ['to1@example.com', 'to2@example.com'])
 
-        thread = email.send()
-        thread.join()
+        f = email.send()
+        rs = f.result()
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
@@ -145,8 +142,7 @@ class TestTemplateEmailSending(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
-        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        DJMAIL_SEND_ASYNC=False)
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_simple_send_email_1(self):
         class SimpleTemplateMail(TemplateMail):
             name = "test_email1"
@@ -163,8 +159,7 @@ class TestTemplateEmailSending(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
-        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        DJMAIL_SEND_ASYNC=False)
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_simple_send_email_2(self):
         class SimpleTemplateMail(TemplateMail):
             name = "test_email2"
@@ -182,8 +177,7 @@ class TestTemplateEmailSending(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
-        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        DJMAIL_SEND_ASYNC=False)
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_simple_send_email_with_magic_builder_1(self):
         mails = MagicMailBuilder()
 
@@ -200,8 +194,7 @@ class TestTemplateEmailSending(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
-        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        DJMAIL_SEND_ASYNC=False)
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_simple_send_email_with_magic_builder_1_with_low_priority(self):
         mails = MagicMailBuilder()
 

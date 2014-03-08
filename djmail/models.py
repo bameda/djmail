@@ -39,12 +39,12 @@ class Message(models.Model):
     exception = models.TextField(editable=True, blank=True)
 
     def get_email_message(self):
-        raw_pickle_data = base64.decodestring(force_bytes(self.data))
+        raw_pickle_data = base64.b64decode(force_bytes(self.data))
         return pickle.loads(raw_pickle_data)
 
     @classmethod
     def from_email_message(cls, email_message, save=False):
-        data = base64.encodestring(pickle.dumps(email_message))
+        data = base64.b64encode(pickle.dumps(email_message))
         instance = cls(data=data)
 
         if save:
