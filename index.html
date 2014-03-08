@@ -103,11 +103,7 @@ Handles priority, with ability to delay send messages to periodic task (with cro
 </p>
 </li>
 </ul></div>
-<div class="sect2">
-<h3 id="_configure">3.1. Configure</h3>
-<div class="sect3">
-<h4 id="_first_steps">3.1.1. First steps</h4>
-<div class="paragraph"><p>For get djmail working on your project, you should configure it.</p></div>
+<div class="paragraph"><p>For get djmail working on your project, you should configure it:</p></div>
 <div class="listingblock">
 <div class="title">Example initial development configuration:</div>
 <div class="content"><div class="highlight"><pre><span class="n">EMAIL_BACKEND</span><span class="o">=</span><span class="s">&quot;djmail.backends.default.EmailBackend&quot;</span>
@@ -115,9 +111,13 @@ Handles priority, with ability to delay send messages to periodic task (with cro
 </pre></div></div></div>
 <div class="paragraph"><p>This specifies: emails are managed by djmail default backend and sended using
 console based django builtin backend.</p></div>
+<div class="sect2">
+<h3 id="_how_to_use">3.1. How to use?</h3>
+<div class="paragraph"><p>djmail works as middleware, and the simpler way to use it, is do nothink, only send
+emails as what did you do before.</p></div>
 </div>
-<div class="sect3">
-<h4 id="_backends">3.1.2. Backends</h4>
+<div class="sect2">
+<h3 id="_backends">3.2. Backends</h3>
 <div class="paragraph"><p><em>djmail</em> comes with three backends:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -142,7 +142,6 @@ console based django builtin backend.</p></div>
 </div>
 </div>
 </div>
-</div>
 <div class="sect1">
 <h2 id="_template_emails">4. Template Emails</h2>
 <div class="sectionbody">
@@ -155,7 +154,7 @@ console based django builtin backend.</p></div>
 </li>
 <li>
 <p>
-<strong>djmail.template_mail.MagiMailBuilder</strong>: high level interface with some magic.
+<strong>djmail.template_mail.MagicMailBuilder</strong>: high level interface with some magic.
 </p>
 </li>
 </ul></div>
@@ -212,12 +211,12 @@ usage:</p></div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_magimailbuilder">4.2. MagiMailBuilder</h3>
+<h3 id="_magicmailbuilder">4.2. MagicMailBuilder</h3>
 <div class="paragraph"><p>This is a more powerful way for build email messages from templates. Behind the scene, it uses
 <span class="monospaced">TemplateMail</span> implementation but exposes a dynamic api that allows build subclases of <span class="monospaced">TemplateMail</span>
 on demand.</p></div>
 <div class="listingblock">
-<div class="title">Example that represents the same behavior as previous example using <span class="monospaced">TemplateMail</span> but using dynamic api of <span class="monospaced">MagiMailBuilder</span></div>
+<div class="title">Example that represents the same behavior as previous example using <span class="monospaced">TemplateMail</span> but using dynamic api of <span class="monospaced">MagicMailBuilder</span></div>
 <div class="content"><div class="highlight"><pre><span class="c"># Create MagicMailBuilder instance</span>
 <span class="n">mails</span> <span class="o">=</span> <span class="n">template_mail</span><span class="o">.</span><span class="n">MagicMailBuilder</span><span class="p">()</span>
 
@@ -287,7 +286,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <div id="footer">
 <div id="footer-text">
 Version 0.5.0<br>
-Last updated 2014-03-08 18:39:09 CET
+Last updated 2014-03-08 19:01:59 CET
 </div>
 </div>
 </body>
