@@ -129,11 +129,11 @@ class TestEmailSending(TestCase):
         message_model.retry_count = 3
         message_model.save()
 
-        core._mark_discarted_messages()
+        core._mark_discarded_messages()
 
         message_model_2 = models.Message.objects.get(pk=message_model.pk)
         self.assertEqual(message_model_2.retry_count, 3)
-        self.assertEqual(message_model_2.status, models.STATUS_DISCARTED)
+        self.assertEqual(message_model_2.status, models.STATUS_DISCARDED)
 
 
 class TestTemplateEmailSending(TestCase):

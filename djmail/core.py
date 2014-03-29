@@ -119,13 +119,13 @@ def _retry_send_messages():
     connection.close()
     return sended_counter
 
-def _mark_discarted_messages():
+def _mark_discarded_messages():
     """
     Function that search messaged that exceds the global retry
-    number and marks its as discarted messages.
+    number and marks its as discarded messages.
     """
 
     max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED,
                                              retry_count__gt=max_retry_value)
-    return queryset.update(status=models.STATUS_DISCARTED)
+    return queryset.update(status=models.STATUS_DISCARDED)

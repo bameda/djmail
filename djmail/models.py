@@ -12,7 +12,7 @@ STATUS_DRAFT = 10
 STATUS_PENDING = 20
 STATUS_SENT = 30
 STATUS_FAILED = 40
-STATUS_DISCARTED = 50
+STATUS_DISCARDED = 50
 
 PRIORITY_LOW = 20
 PRIORITY_STANDARD = 50
@@ -23,7 +23,7 @@ class Message(models.Model):
         (STATUS_DRAFT, "Draft"),
         (STATUS_SENT, "Sent"),
         (STATUS_FAILED, "Failed"),
-        (STATUS_DISCARTED, "Discarted"),
+        (STATUS_DISCARDED, "Discarded"),
     )
 
     uuid = models.CharField(max_length=40, primary_key=True,
