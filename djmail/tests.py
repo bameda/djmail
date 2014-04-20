@@ -217,3 +217,33 @@ class TestTemplateEmailSending(TestCase):
         m2 = models.Message.objects.get()
         self.assertEqual(m2.status, models.STATUS_SENT)
         self.assertEqual(m2.priority, 10)
+
+
+class SerializationEmailTests(TestCase):
+    def setUp(self):
+        models.Message.objects.all().delete()
+
+    @override_settings(
+        EMAIL_BACKEND="djmail.backends.default.EmailBackend",
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_simple_send_email_with_magic_builder_1(self):
+        mails = MagicMailBuilder()
+
+        import pdb; pdb.set_trace()
+
+        email = mails.test_email2("to@example.com", {"name": "foo"});
+        email.send()
+
+        model = models.Message.objects.get()
+        self.assertEqual(email.from_email, model.from_email)
+        self.assertEqual(email.to, model.to_email.split(","))
+        self.assertEqual(email.subject, model.subject)
+        self.assertEqual(email.body, model.body_text)
+
+        # self.assertEqual(len(mail.outbox), 1)
+        # self.assertEqual(models.Message.objects.count(), 1)
+
+        # self.assertEqual(email.subject, u'Subject2: foo')
+        # self.assertEqual(email.body, u"body\n")
+        # self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
+
