@@ -229,8 +229,6 @@ class SerializationEmailTests(TestCase):
     def test_simple_send_email_with_magic_builder_1(self):
         mails = MagicMailBuilder()
 
-        import pdb; pdb.set_trace()
-
         email = mails.test_email2("to@example.com", {"name": "foo"});
         email.send()
 
