@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import functools
 import traceback
+import logging
 import sys
 
 from django.conf import settings
@@ -12,6 +13,9 @@ from django.utils import translation, six
 from django.template import loader, TemplateDoesNotExist
 
 from . import models
+
+
+log = logging.getLogger("djmail")
 
 
 def _get_body_template_prototype():
@@ -38,6 +42,7 @@ def _trap_exception(function):
         try:
             return function(*args, **kwargs)
         except TemplateDoesNotExist as e:
+            log.error("Template '{0}' does not exists.".format(e))
             return u""
 
     return _decorator
