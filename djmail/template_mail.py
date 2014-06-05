@@ -13,6 +13,7 @@ from django.utils import translation, six
 from django.template import loader, TemplateDoesNotExist
 
 from . import models
+from . import exceptions as exc
 
 
 log = logging.getLogger("djmail")
@@ -42,7 +43,7 @@ def _trap_exception(function):
         try:
             return function(*args, **kwargs)
         except TemplateDoesNotExist as e:
-            log.error("Template '{0}' does not exists.".format(e))
+            log.warning("Template '{0}' does not exists.".format(e))
             return u""
 
     return _decorator
@@ -77,7 +78,6 @@ class TemplateMail(object):
 
     def __init__(self, name=None):
         self._email = None
-
         if name is not None:
             self.name = name
 
@@ -110,12 +110,18 @@ class TemplateMail(object):
         template_name = self._subject_template_name.format(**{
             "ext": template_ext, "name": self.name})
 
-        subject = loader.render_to_string(template_name, ctx)
+        try:
+            subject = loader.render_to_string(template_name, ctx)
+        except TemplateDoesNotExist as e:
+            raise exc.TemplateNotFound("Template '{0}' does not exists.".format(e))
         return u" ".join(subject.strip().split())
 
     def _attach_body_to_email_instance(self, email, ctx):
         body_html = self._render_message_body_as_html(ctx)
         body_txt = self._render_message_body_as_txt(ctx)
+
+        if not body_txt and not body_html:
+            raise exc.TemplateNotFound("Body of email message shouldn't be empty")
 
         if isinstance(email, mail.EmailMultiAlternatives):
             email.body = body_txt
