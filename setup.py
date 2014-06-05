@@ -9,7 +9,7 @@ setup(
     url = "https://github.com/niwibe/djmail",
     author = "Andrey Antukh",
     author_email = "niwi@niwi.be",
-    version='0.5',
+    version="0.6",
     packages = [
         "djmail",
         "djmail.backends",
@@ -20,7 +20,7 @@ setup(
     zip_safe=False,
     include_package_data = True,
     package_data = {
-        '': ['*.html'],
+        "": ["*.html"],
     },
     classifiers = [
         # "Development Status :: 5 - Production/Stable",
