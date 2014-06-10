@@ -18,18 +18,18 @@ Why use djmail?
 
 Because it:
 
-- Sends email asynchronously without additional libraries.
-- Sends email using celery tasks.
-- Can retry send failed messages (with cron task or celery periodic task).
-- Can assign deliver priority.
-- Has powerfull way to build emails from templates.
+- Sends emails asynchronously without additional libraries.
+- Sends emails using celery tasks.
+- Can retry sending failed messages (with cron task or celery periodic task).
+- Can assign delivery priority.
+- Has a powerfull class to build emails from templates.
 - Works transparently (works as middleware for native django email backends)
 
 
 How to install?
 ~~~~~~~~~~~~~~~
 
-The simple way to get djmail for your project, is installing it using *pip*:
+The simplest way to get djmail for your project, is installing it using *pip*:
 
 [source,text]
 ----
@@ -39,15 +39,15 @@ pip install djmail
 User guide
 ----------
 
-As I have mentioned previously, _djmail_ works as middleware.
+As I have mentioned previously, _djmail_ works as a middleware.
 
-- It saves emails using django orm and track it status. If one exception is raised during sending,
-  it marks email as *failed* and stores the exception traceback for posterior analisys.
-- Exposes usefull commands and methods for retry send failed messages.
-- Handles priority, with ability to delay send messages to periodic task (with cron or celery)
-  with lowest priorty.
+- It saves emails using django orm and track its status. If an exception is raised during sending,
+  it marks the email as *failed* and stores the exception traceback for posterior analysis.
+- Exposes usefull commands and methods for retring to send failed messages.
+- Handles priority, with ability to delay sending of messages with lowest priorty 
+  to periodic task (with cron or celery).
 
-For get djmail working on your project, you should configure it:
+To get djmail working on your project, you should configure it:
 
 .Example initial development configuration:
 [source,python]
@@ -56,14 +56,14 @@ EMAIL_BACKEND="djmail.backends.default.EmailBackend"
 DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
 ----
 
-This specifies: emails are managed by djmail default backend and sended using
+This specifies: emails are managed by djmail default backend and sent using
 console based django builtin backend.
 
 How to use?
 ~~~~~~~~~~~
 
-djmail works as middleware, and the simpler way to use it, is do nothink, only send
-emails as what did you do before.
+djmail works as a middleware, and the simplest way to use it, is to not think, just send
+emails the way you did before.
 
 
 Backends
@@ -84,7 +84,7 @@ _djmail_ comes with three backends:
 Template Emails
 ---------------
 
-_djmail_ comes with some utils for easy build emails from templates:
+_djmail_ comes with two util classes for easily building emails from templates:
 
 - *djmail.template_mail.TemplateMail*: low level interface.
 - *djmail.template_mail.MagicMailBuilder*: high level interface with some magic.
@@ -93,7 +93,7 @@ _djmail_ comes with some utils for easy build emails from templates:
 TemplateMail
 ~~~~~~~~~~~~
 
-Is a low level interface for buid emails using templates. It allows statically define email classes for posterior
+This is a low level interface for buiding emails using templates. It allows to statically define email classes for posterior
 usage:
 
 [source,python]
@@ -109,14 +109,14 @@ email = SomeTemplateEmail()
 email.send("to@example.com", {"template": "context"})
 ----
 
-If you want obtain django native Email instance:
+Also you can obtain a native django email instance from TemplateMail instance:
 
 [source, python]
 ----
 # Create a instance
 template_email = SomeTemplateEmail()
 
-# Or obtain a native django email object
+# obtain a native django email object
 email = template_email.make_email_object("to@example.com",
                                          {"template": "context"})
 email.send()
@@ -134,8 +134,8 @@ NOTE: Text version of email is ommited if template does not exists.
 MagicMailBuilder
 ~~~~~~~~~~~~~~~~
 
-This is a more powerful way for build email messages from templates. Behind the scene, it uses
-`TemplateMail` implementation but exposes a dynamic api that allows build subclases on demand.
+This is a more powerful way for building email messages from templates. Behind the scenes, it uses
+`TemplateMail` implementation but exposes a dynamic api that allows building of subclasses on demand.
 
 .Example that represents the same behavior as previous example using dynamic api of `MagicMailBuilder`
 [source,python]
@@ -163,24 +163,24 @@ user = MyUser.objects.get(pk=1)
 email = mails.some_email(user, {"template": "context"})
 ----
 
-Magic builder is really magic, and if your user has lang field, magic builder uses it to setup a correct user language
-for render email in user locale.
+Magic builder is really magic, and if your user class has lang field, magic builder uses it to setup a correct user language
+for rendering email in user locale.
 
 NOTE: Also, you can specify a custom "lang" on context for same purpose.
 
 Settings
 --------
 
-djmail exposes some additional settings for costumize a great part of default behavior.
+djmail exposes some additional settings for costumizing a great part of default behavior.
 
 - *DJMAIL_REAL_BACKEND* +
-  Indicates to djmail which a real email backend use for deliver email messages. +
+  Indicates to djmail which django email backend to use for delivering email messages. +
   Default: `django.core.mail.backends.console.EmailBackend`
 - *DJMAIL_MAX_RETRY_NUMBER* +
-  Set a default maximum retry number for deliver failed messages. +
+  Set a default maximum retry number for delivering failed messages. +
   Default: 3
 - *DJMAIL_BODY_TEMPLATE_PROTOTYPE* +
-  Prototype for make body template path. +
+  Prototype for making body template path. +
   Default: `emails/{name}-body-{type}.{ext}`
 - *DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE* +
   Prototype for make subject template path. +
