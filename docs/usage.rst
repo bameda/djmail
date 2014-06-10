@@ -4,8 +4,8 @@
 How to use
 ==========
 
-djmail works as middleware, and the simpler way to use it, is do nothink, only send
-emails as what did you do before.
+djmail works as middleware, and the simplest way to use it, is to not hink, just send
+emails the way you did before.
 
 
 Email delivery backends
@@ -13,7 +13,7 @@ Email delivery backends
 
 djmail provides two backends:
 
-* **default**: sends emails on the same process/thread or in other thread.
+* **default**: sends emails on the same process/thread or in another thread.
 * **celery**: sends emails asynchronously with celery tasks.
 
 Default
@@ -21,16 +21,16 @@ Default
 
 This backend works in two modes: **standard** or **async**.
 
-The **standard** mode, works very similar as any backend of django, with exception of status tracking
-and failuire scheduling.
+The **standard** mode, works similar to any backend of django, with the exception of status tracking
+and failure scheduling.
 
-The **async** mode, do samethink like previos but sends a email in a new thread.
+The **async** mode, works the same way like the standard mode but sends the email in a new thread.
 
 Celery
 ^^^^^^
 
-The celery backend uses celery async tasks to send emails and its always send asyncronous. Obviously, with
-same behavior as default.
+The celery backend uses celery async tasks to send emails and is always asyncronous. It has the
+same behavior as the default backend.
 
 Example configuration with celery backend:
 
@@ -43,19 +43,19 @@ Example configuration with celery backend:
 Email retry methods
 -------------------
 
-djmail implements two methods for deliver failed email messages:
+djmail implements two methods for delivering failed email messages:
 
 * With operating system crond service.
 * With celery periodic tasks.
 
-If you choice is crond, you need execute this management command every N min/sec:
+If your choice is crond, you need to execute this management command every N min/sec:
 
 .. code-block:: console
 
     python manage.py djmail_retry_send_messages
 
 
-But if you choice is celery periodic tasks, this is a possible example of a configuration:
+But if your choice is celery periodic tasks, this is a possible example of a configuration:
 
 .. code-block:: python
 
@@ -68,7 +68,7 @@ But if you choice is celery periodic tasks, this is a possible example of a conf
         },
     }
 
-Also, you can costumize the maximum number of retry with these settings parameter:
+Also, you can customize the maximum number of retries with the following settings parameters:
 
 .. code-block:: python
 
@@ -78,18 +78,18 @@ Also, you can costumize the maximum number of retry with these settings paramete
 Render emails with templates
 ----------------------------
 
-djmail implements two classes for build emails from templates.
+djmail implements two classes for building emails from templates.
 
 * **djmail.template_mail.TemplateMail**: low lever interface.
-* **djmail.template_mail.MagicMailBuilder**: very powerful and magic interface.
+* **djmail.template_mail.MagicMailBuilder**: very powerful and magical interface.
 
 
 TemplateMail
 ^^^^^^^^^^^^
 
-The ``TemplateMail`` is a low level implementation for build emails from templates.
+The ``TemplateMail`` is a low level implementation for building emails from templates.
 
-This is a simpler example for use it:
+Given below is a simple example for using it:
 
 .. code-block:: python
 
@@ -97,17 +97,17 @@ This is a simpler example for use it:
     class SomeTemplateEmail(template_mail.TemplateMail):
         name = "some_email"
 
-    # Create a instance
+    # Create an instance
     email = SomeTemplateEmail()
 
-    # Buld and sent message with specified context
+    # Buld and send a message with specified context
     email.send("to@example.com", {"template": "context"})
 
 Also you can obtain a native django email instance from TemplateMail instance:
 
 .. code-block:: python
 
-    # Create a instance
+    # Create an instance
     template_email = SomeTemplateEmail()
 
     # Or obtain a native django email object
@@ -116,7 +116,7 @@ Also you can obtain a native django email instance from TemplateMail instance:
     email.send()
 
 
-TemplateMail or a subclass, by default search these templates:
+An object of TemplateMail or its subclass, by default will search for these templates:
 
 * **emails/some_email-body-html.html**
 * **emails/some_email-body-text.html**
@@ -124,7 +124,7 @@ TemplateMail or a subclass, by default search these templates:
 
 .. note::
 
-    Text version of email body is omited if template does not exists.
+    Text version of email body is omitted if template does not exist.
 
 You can change the search pattern with some settings parameters that you
 can see in :ref:`Settings <settings>` section.
@@ -133,10 +133,10 @@ can see in :ref:`Settings <settings>` section.
 MagicMailBuilder
 ^^^^^^^^^^^^^^^^
 
-This is a more powerful method for building messages from templates. It delegates a email
-building to a TemplateMail buit exposes more easy and dynamic api.
+This is a more powerful method for building messages from templates. It delegates an email
+building to a TemplateMail but exposes a more easy and dynamic api.
 
-This example represents the same behavior as previos example:
+This example represents the same behavior as the previous example:
 
 .. code-block:: python
 
@@ -144,7 +144,7 @@ This example represents the same behavior as previos example:
     mails = template_mail.MagicMailBuilder()
 
     # Create a native email object.
-    # NOTE: The method name represents a email name.
+    # NOTE: The method name represents an email name.
     email = mails.some_email("to@example.com", {"template": "context"})
     email.send()
 
@@ -163,14 +163,14 @@ instance that represents a user:
     email = mails.some_email(user, {"template": "context"})
 
 
-If you user class has email/lang field with other names, you can customize it
+If you user class has an email/lang field with other names, you can customize it
 with some parameters to a constructor of MagicMailBuilder:
 
 I18n
 ^^^^
 
-Both previous api's implements i18n for rendering email body and subject. For activate a
-specific languate you must pass ``lang`` attribute on a context parameter.
+Both of the previous apis implement i18n for rendering an email body and subject. For using a
+specific language you must pass ``lang`` attribute on a context parameter.
 
 Example:
 
@@ -187,8 +187,8 @@ keyword argument (by default with 50 as priority value)-
 
 .. note::
 
-   Email objects with low priority are not sent immediately, but are nevertheless sending
-   are delayed until the next scheduled delivery process (with cron or celery).
+   Email objects with low priority are not sent immediately, the sending
+   is delayed until the next scheduled delivery process (with cron or celery).
 
 
 .. code-block:: python
