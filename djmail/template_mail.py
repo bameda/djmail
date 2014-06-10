@@ -3,13 +3,17 @@
 from __future__ import print_function
 
 import functools
-import traceback
 import logging
-import sys
 
 from django.conf import settings
 from django.core import mail
-from django.utils import translation, six
+from django.utils import translation
+try:
+    # Django >= 1.4.5
+    from django.utils.six import string_types
+except ImportError:
+    # Django < 1.4.5
+    string_types = basestring
 from django.template import loader, TemplateDoesNotExist
 
 from . import models
@@ -159,7 +163,7 @@ class MagicMailBuilder(object):
         def _dynamic_email_generator(to, ctx, priority=models.PRIORITY_STANDARD):
             lang = None
 
-            if not isinstance(to, six.string_types):
+            if not isinstance(to, string_types):
                 if not hasattr(to, self._email_attr):
                     raise AttributeError(
                         "'to' parameter does not "
