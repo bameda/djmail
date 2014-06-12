@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import functools
 import io
 
 from django.conf import settings
-from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail import get_connection
 from django.core.paginator import Paginator
 from django.utils import timezone
+import traceback
 
 from . import models
 
