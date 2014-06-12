@@ -1,7 +1,7 @@
 djmail documentation
 ====================
 Andrey Antukh, <niwi@niwi.be>
-0.5.0, 2014-03-08
+0.7.0, 2014-06-12
 
 :toc:
 :numbered:
@@ -77,8 +77,6 @@ _djmail_ comes with three backends:
   send emails asynchronously using `concurrent.futures`.
 - *djmail.backends.celery.EmailBackend* +
   send emails asynchronously using celery tasks.
-
-
 
 
 Template Emails
