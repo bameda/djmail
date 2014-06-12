@@ -1,0 +1,22 @@
+Changelog
+=========
+
+Version 0.7
+-----------
+
+- Add missing modules not included in the previous version.
+- Django 1.4.x support added.
+- Minor code cleaning.
+
+
+Version 0.6
+-----------
+
+- Better control for empty bodies.
+
+
+Version 0.5
+-----------
+
+- New documentation.
+- Runtests improvements.
