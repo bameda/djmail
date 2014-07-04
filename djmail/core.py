@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
-
-import sys
 import io
+import logging
+import sys
+import traceback
 
 from django.conf import settings
 from django.core.mail import get_connection
 from django.core.paginator import Paginator
 from django.utils import timezone
-import traceback
 
 from . import models
+
 
 PY2 = sys.version_info[0] == 2
 StringIO = io.StringIO
 if PY2:
     StringIO = io.BytesIO
+
+logger = logging.getLogger('djmail')
 
 
 def _chunked_iterate_queryset(queryset, chunk_size=10):
@@ -46,6 +49,7 @@ def _safe_send_message(message_model, connection):
             traceback.print_exc(file=f)
             f.seek(0)
             message_model.exception = f.read()
+            logger.error(message_model.exception)
         else:
             if sended == 1:
                 message_model.status = models.STATUS_SENT

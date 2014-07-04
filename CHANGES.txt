@@ -1,6 +1,8 @@
 Changelog
 =========
 
+- Fixed errors' handling in python2.
+
 Version 0.7
 -----------
 
