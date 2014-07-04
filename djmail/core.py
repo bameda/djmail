@@ -29,6 +29,7 @@ def _chunked_iterate_queryset(queryset, chunk_size=10):
         for item in page.object_list:
             yield item
 
+
 def _safe_send_message(message_model, connection):
     """
     Given a message model, try send it, if send process
@@ -38,13 +39,13 @@ def _safe_send_message(message_model, connection):
     email = message_model.get_email_message()
     sended = 0
 
-    with StringIO() as file:
+    with StringIO() as f:
         try:
             sended = connection.send_messages([email])
-        except Exception as e:
-            traceback.print_exc(file=file)
-            file.seek(0)
-            message_model.exception = file.read()
+        except Exception:
+            traceback.print_exc(file=f)
+            f.seek(0)
+            message_model.exception = f.read()
         else:
             if sended == 1:
                 message_model.status = models.STATUS_SENT
@@ -56,10 +57,14 @@ def _safe_send_message(message_model, connection):
         message_model.save()
         return sended
 
+
 def _get_real_backend():
-    real_backend_path = getattr(settings, "DJMAIL_REAL_BACKEND",
-                           'django.core.mail.backends.console.EmailBackend')
+    real_backend_path = getattr(
+        settings,
+        "DJMAIL_REAL_BACKEND",
+        'django.core.mail.backends.console.EmailBackend')
     return get_connection(backend=real_backend_path, fail_silently=False)
+
 
 def _send_messages(email_messages):
     connection = _get_real_backend()
@@ -87,11 +92,11 @@ def _send_messages(email_messages):
     connection.close()
     return sended_counter
 
+
 def _send_pending_messages():
     """
     Function that sends pending, low priority messages.
     """
-    max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_PENDING)\
                                      .order_by("-priority", "created_at")
     connection = _get_real_backend()
@@ -104,6 +109,7 @@ def _send_pending_messages():
 
     connection.close()
     return sended_counter
+
 
 def _retry_send_messages():
     """
@@ -123,6 +129,7 @@ def _retry_send_messages():
 
     connection.close()
     return sended_counter
+
 
 def _mark_discarded_messages():
     """
