@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import io
 
 from django.conf import settings
@@ -9,6 +10,11 @@ from django.utils import timezone
 import traceback
 
 from . import models
+
+PY2 = sys.version_info[0] == 2
+StringIO = io.StringIO
+if PY2:
+    StringIO = io.BytesIO
 
 
 def _chunked_iterate_queryset(queryset, chunk_size=10):
@@ -32,7 +38,7 @@ def _safe_send_message(message_model, connection):
     email = message_model.get_email_message()
     sended = 0
 
-    with io.StringIO() as file:
+    with StringIO() as file:
         try:
             sended = connection.send_messages([email])
         except Exception as e:
