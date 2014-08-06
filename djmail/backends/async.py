@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 import functools
 from concurrent.futures import Future, ThreadPoolExecutor
 
