@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 description = """
 Simple, powerfull and nonobstructive django email middleware.
@@ -12,12 +12,7 @@ setup(
     author="Andrey Antukh",
     author_email="niwi@niwi.be",
     version="0.8",
-    packages=[
-        "djmail",
-        "djmail.backends",
-        "djmail.management",
-        "djmail.management.commands",
-    ],
+    packages=find_packages(include=['djmail*']),
     description=description.strip(),
     zip_safe=False,
     include_package_data=True,
