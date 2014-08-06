@@ -22,4 +22,3 @@ class BaseEmailBackend(object):
 
     def send_messages(self, email_messages):
         return self._send_messages(email_messages)
-

@@ -96,7 +96,7 @@ class TemplateMail(object):
     def _render_message_body_as_html(self, ctx):
         template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
-            "ext": template_ext, "name": self.name, "type":"html"})
+            "ext": template_ext, "name": self.name, "type": "html"})
 
         return loader.render_to_string(template_name, ctx)
 
