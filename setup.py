@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 description = """
-Simple, powerfull and nonobstructive django email middleware.
+Simple, powerful and non-obstructive django email middleware.
 """
 
 setup(
