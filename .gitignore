@@ -1,7 +1,9 @@
 *.pyc
 .*swp
 doc/index.html
+build/
 dist*
+/*.egg*
 *.swp
 \#*
 .\#*
