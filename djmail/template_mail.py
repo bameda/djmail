@@ -127,11 +127,9 @@ class TemplateMail(object):
         if not body_txt and not body_html:
             raise exc.TemplateNotFound("Body of email message shouldn't be empty")
 
+        email.body = body_txt
         if isinstance(email, mail.EmailMultiAlternatives):
-            email.body = body_txt
             email.attach_alternative(body_html, "text/html")
-        else:
-            email.body = body_txt
 
     def _attach_subject_to_email_instance(self, email, context):
         email.subject = self._render_message_subject(context)
