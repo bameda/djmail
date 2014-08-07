@@ -175,10 +175,10 @@ class MagicMailBuilder(object):
                 to = getattr(to, self._email_attr)
 
             if lang is not None:
-                ctx["lang"] = lang
+                context["lang"] = lang
 
             template_email = self._template_mail_cls(name=name)
-            email_instance = template_email.make_email_object(to, ctx)
+            email_instance = template_email.make_email_object(to, context)
             email_instance.priority = priority
 
             return email_instance
