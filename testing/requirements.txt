@@ -1,3 +1,2 @@
 django>=1.5.1
 psycopg2>=2.5
--e git://github.com/moggers87/premailer.git#egg=premailer

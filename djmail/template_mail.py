@@ -145,12 +145,8 @@ class TemplateMail(object):
         self._attach_subject_to_email_instance(email, context)
         return email
 
-    def send(self, to, context, inline_css=False, **kwargs):
+    def send(self, to, context, **kwargs):
         email = self.make_email_object(to, context, **kwargs)
-        if inline_css:
-            # Transform CSS into line style attributes
-            import premailer
-            email.alternatives = [premailer.transform(a) if 'html' in a[1] else a for a in email.alternatives]
         return email.send()
 
 
