@@ -150,6 +150,14 @@ class TemplateMail(object):
         return email.send()
 
 
+class InlineCSSTemplateMail(TemplateMail):
+
+    def _render_message_body_as_html(self, context):
+        # Transform CSS into line style attributes
+        import premailer
+        return premailer.transform(super()._render_message_body_as_html(context))
+
+
 class MagicMailBuilder(object):
     def __init__(self, email_attr="email", lang_attr="lang",
                  template_mail_cls=TemplateMail):
