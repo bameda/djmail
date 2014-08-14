@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from django.core.mail import EmailMessage
 from django.core import mail
-from django.db import connection
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -37,7 +36,7 @@ class TestEmailSending(TestCase):
         # returns a thread instead of a number of
         # sent messages.
         future = email.send()
-        result = future.result()
+        future.result()
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(models.Message.objects.count(), 1)
@@ -65,8 +64,8 @@ class TestEmailSending(TestCase):
         email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
                              ['to1@example.com', 'to2@example.com'])
 
-        f = email.send()
-        rs = f.result()
+        future = email.send()
+        future.result()
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
@@ -121,7 +120,7 @@ class TestEmailSending(TestCase):
         EMAIL_BACKEND="djmail.backends.celery.EmailBackend",
         DJMAIL_REAL_BACKEND="testing.mocks.BrokenEmailBackend",
         DJMAIL_MAX_RETRY_NUMBER=2)
-    def test_failing_retry_send_01(self):
+    def test_failing_retry_send_02(self):
         email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
                              ['to1@example.com', 'to2@example.com'])
         message_model = models.Message.from_email_message(email)
@@ -181,7 +180,7 @@ class TestTemplateEmailSending(TestCase):
     def test_simple_send_email_with_magic_builder_1(self):
         mails = MagicMailBuilder()
 
-        email = mails.test_email2("to@example.com", {"name": "foo"});
+        email = mails.test_email2("to@example.com", {"name": "foo"})
         email.send()
 
         self.assertEqual(len(mail.outbox), 1)
@@ -191,19 +190,17 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(email.body, u"body\n")
         self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
 
-
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
         DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_simple_send_email_with_magic_builder_1_with_low_priority(self):
         mails = MagicMailBuilder()
 
-        email = mails.test_email2("to@example.com", {"name": "foo"}, priority=10);
+        email = mails.test_email2("to@example.com", {"name": "foo"}, priority=10)
         email.send()
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
-
 
         m1 = models.Message.objects.get()
         self.assertEqual(m1.status, models.STATUS_PENDING)
@@ -229,7 +226,7 @@ class SerializationEmailTests(TestCase):
     def test_simple_send_email_with_magic_builder_1(self):
         mails = MagicMailBuilder()
 
-        email = mails.test_email2("to@example.com", {"name": "foo"});
+        email = mails.test_email2("to@example.com", {"name": "foo"})
         email.send()
 
         model = models.Message.objects.get()
@@ -244,4 +241,3 @@ class SerializationEmailTests(TestCase):
         # self.assertEqual(email.subject, u'Subject2: foo')
         # self.assertEqual(email.body, u"body\n")
         # self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
-

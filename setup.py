@@ -1,28 +1,25 @@
-from setuptools import setup
+# -*- encoding: utf-8 -*-
+
+from setuptools import find_packages, setup
 
 description = """
-Simple, powerfull and nonobstructive django email middleware.
+Simple, powerful and non-obstructive django email middleware.
 """
 
 setup(
-    name = "djmail",
-    url = "https://github.com/niwibe/djmail",
-    author = "Andrey Antukh",
-    author_email = "niwi@niwi.be",
+    name="djmail",
+    url="https://github.com/niwibe/djmail",
+    author="Andrey Antukh",
+    author_email="niwi@niwi.be",
     version="0.8",
-    packages = [
-        "djmail",
-        "djmail.backends",
-        "djmail.management",
-        "djmail.management.commands",
-    ],
-    description = description.strip(),
+    packages=find_packages(include=['djmail*']),
+    description=description.strip(),
     zip_safe=False,
-    include_package_data = True,
-    package_data = {
+    include_package_data=True,
+    package_data={
         "": ["*.html"],
     },
-    classifiers = [
+    classifiers=[
         # "Development Status :: 5 - Production/Stable",
         "Development Status :: 4 - Beta",
         "Operating System :: OS Independent",

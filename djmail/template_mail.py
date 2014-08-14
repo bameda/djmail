@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from __future__ import print_function
 
@@ -59,17 +59,17 @@ def _trap_language(function):
     the execution.
     """
     @functools.wraps(function)
-    def _decorator(self, ctx):
+    def _decorator(self, context):
         language_new = None
         language_old = translation.get_language()
 
         # If attr found on context, set a new language
-        if "lang" in ctx:
-            language_new = ctx["lang"]
+        if "lang" in context:
+            language_new = context["lang"]
             translation.activate(language_new)
 
         try:
-            return function(self, ctx)
+            return function(self, context)
         finally:
             if language_new is not None:
                 translation.activate(language_old)
@@ -93,63 +93,69 @@ class TemplateMail(object):
 
     @_trap_exception
     @_trap_language
-    def _render_message_body_as_html(self, ctx):
+    def _render_message_body_as_html(self, context):
         template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
-            "ext": template_ext, "name": self.name, "type":"html"})
+            "ext": template_ext, "name": self.name, "type": "html"})
 
-        return loader.render_to_string(template_name, ctx)
+        return loader.render_to_string(template_name, context)
 
     @_trap_exception
     @_trap_language
-    def _render_message_body_as_txt(self, ctx):
+    def _render_message_body_as_txt(self, context):
         template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
             "ext": template_ext, "name": self.name, "type": "text"})
 
-        return loader.render_to_string(template_name, ctx)
+        return loader.render_to_string(template_name, context)
 
-    def _render_message_subject(self, ctx):
+    def _render_message_subject(self, context):
         template_ext = _get_template_extension()
         template_name = self._subject_template_name.format(**{
             "ext": template_ext, "name": self.name})
 
         try:
-            subject = loader.render_to_string(template_name, ctx)
+            subject = loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
             raise exc.TemplateNotFound("Template '{0}' does not exists.".format(e))
         return u" ".join(subject.strip().split())
 
-    def _attach_body_to_email_instance(self, email, ctx):
-        body_html = self._render_message_body_as_html(ctx)
-        body_txt = self._render_message_body_as_txt(ctx)
+    def _attach_body_to_email_instance(self, email, context):
+        body_html = self._render_message_body_as_html(context)
+        body_txt = self._render_message_body_as_txt(context)
 
         if not body_txt and not body_html:
             raise exc.TemplateNotFound("Body of email message shouldn't be empty")
 
+        email.body = body_txt
         if isinstance(email, mail.EmailMultiAlternatives):
-            email.body = body_txt
             email.attach_alternative(body_html, "text/html")
-        else:
-            email.body = body_txt
 
-    def _attach_subject_to_email_instance(self, email, ctx):
-        email.subject = self._render_message_subject(ctx)
+    def _attach_subject_to_email_instance(self, email, context):
+        email.subject = self._render_message_subject(context)
 
-    def make_email_object(self, to, ctx, **kwargs):
+    def make_email_object(self, to, context, **kwargs):
         if not isinstance(to, (list, tuple)):
             to = [to]
 
         email = mail.EmailMultiAlternatives(**kwargs)
         email.to = to
 
-        self._attach_body_to_email_instance(email, ctx)
-        self._attach_subject_to_email_instance(email, ctx)
+        self._attach_body_to_email_instance(email, context)
+        self._attach_subject_to_email_instance(email, context)
         return email
 
     def send(self, to, context, **kwargs):
         email = self.make_email_object(to, context, **kwargs)
         return email.send()
+
+
+class InlineCSSTemplateMail(TemplateMail):
+
+    def _render_message_body_as_html(self, context):
+        # Transform CSS into line style attributes
+        import premailer
+        return premailer.transform(super()._render_message_body_as_html(context))
 
 
 class MagicMailBuilder(object):
@@ -160,7 +166,7 @@ class MagicMailBuilder(object):
         self._template_mail_cls = template_mail_cls
 
     def __getattr__(self, name):
-        def _dynamic_email_generator(to, ctx, priority=models.PRIORITY_STANDARD):
+        def _dynamic_email_generator(to, context, priority=models.PRIORITY_STANDARD):
             lang = None
 
             if not isinstance(to, string_types):
@@ -173,10 +179,10 @@ class MagicMailBuilder(object):
                 to = getattr(to, self._email_attr)
 
             if lang is not None:
-                ctx["lang"] = lang
+                context["lang"] = lang
 
             template_email = self._template_mail_cls(name=name)
-            email_instance = template_email.make_email_object(to, ctx)
+            email_instance = template_email.make_email_object(to, context)
             email_instance.priority = priority
 
             return email_instance

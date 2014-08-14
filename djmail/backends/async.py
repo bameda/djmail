@@ -1,9 +1,9 @@
-import threading
+# -*- encoding: utf-8 -*-
+
 import functools
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from django.db import connection
-from django.conf import settings
 from djmail import core
 
 from . import base

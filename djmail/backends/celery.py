@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from __future__ import absolute_import
 
-from django.conf import settings
 from djmail.backends import base
-from djmail import core
 from djmail import tasks
 
 
