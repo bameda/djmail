@@ -10,7 +10,7 @@ setup(
     author="Andrey Antukh",
     author_email="niwi@niwi.be",
     version="0.9",
-    packages=find_packages(include=['djmail*']),
+    packages=find_packages(exclude=['contrib', 'docs', 'test*']),
     description=description.strip(),
     zip_safe=False,
     include_package_data=True,
