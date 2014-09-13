@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Version 0.9
+-----------
+
+- code cleaning (pep8) (by @davidfischer-ch)
+- fix wrong parameters on management command (by @mathieuhinderyckx)
+
 Version 0.8
 -----------
 
