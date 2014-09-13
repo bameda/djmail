@@ -1,5 +1,3 @@
-# -*- encoding: utf-8 -*-
-
 from setuptools import find_packages, setup
 
 description = """
@@ -11,7 +9,7 @@ setup(
     url="https://github.com/niwibe/djmail",
     author="Andrey Antukh",
     author_email="niwi@niwi.be",
-    version="0.8",
+    version="0.9",
     packages=find_packages(include=['djmail*']),
     description=description.strip(),
     zip_safe=False,
