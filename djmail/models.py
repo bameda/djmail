@@ -25,6 +25,8 @@ STATUS_DISCARDED = 50
 PRIORITY_LOW = 20
 PRIORITY_STANDARD = 50
 
+def new_uuid():
+    return str(uuid.uuid1())
 
 class Message(models.Model):
     STATUS_CHOICES = (
@@ -35,7 +37,7 @@ class Message(models.Model):
     )
 
     uuid = models.CharField(max_length=40, primary_key=True,
-                            default=lambda: str(uuid.uuid1()))
+                            default=new_uuid())
 
     from_email = models.CharField(max_length=1024, blank=True)
     to_email = models.TextField(blank=True)
