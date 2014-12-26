@@ -15,6 +15,9 @@ except ImportError:
         smart_unicode as force_text, smart_str as force_bytes)
 from django.db import models
 
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
+
 
 STATUS_DRAFT = 10
 STATUS_PENDING = 20
@@ -34,8 +37,7 @@ class Message(models.Model):
         (STATUS_DISCARDED, "Discarded"),
     )
 
-    uuid = models.CharField(max_length=40, primary_key=True,
-                            default=lambda: str(uuid.uuid1()))
+    uuid = models.CharField(max_length=40, primary_key=True)
 
     from_email = models.CharField(max_length=1024, blank=True)
     to_email = models.TextField(blank=True)
@@ -81,3 +83,9 @@ class Message(models.Model):
         ordering = ["created_at"]
         verbose_name = "Message"
         verbose_name_plural = "Messages"
+
+
+@receiver(pre_save, sender=Message, dispatch_uid='message_uuid_signal')
+def generate_uuid(sender, instance, **kwargs):
+    if not instance.uuid:
+        instance.uuid = str(uuid.uuid1())

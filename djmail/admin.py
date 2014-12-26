@@ -5,9 +5,8 @@ from . import models
 
 
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('uuid', 'status', 'priority', 'created_at', 'sent_at', 'retry_count')
-    list_display_links = list_display
-
-    list_filter = ('status', 'priority', 'created_at', 'sent_at', 'retry_count')
+    list_display = ['uuid', 'from_email', 'to_email', 'status', 'priority', 'created_at', 'sent_at', 'retry_count']
+    list_filter = ['status', 'priority', 'created_at', 'sent_at', 'retry_count']
+    search_fields = ['from_email', 'to_email', 'subject', 'uuid']
 
 admin.site.register(models.Message, MessageAdmin)
