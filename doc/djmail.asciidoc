@@ -59,6 +59,14 @@ DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
 This specifies: emails are managed by djmail default backend and sent using
 console based django builtin backend.
 
+If your project is using South consider to include the following line in your settings file:
+
+----
+SOUTH_MIGRATION_MODULES = {
+    'djmail': 'djmail.south_migrations',
+}
+----
+
 How to use?
 ~~~~~~~~~~~
 
