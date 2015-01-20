@@ -33,7 +33,7 @@ def _get_template_extension():
 
 
 @contextmanager
-def temporary_language(lang):
+def language(lang):
     old_language = translation.get_language()
     try:
         translation.activate(lang)
