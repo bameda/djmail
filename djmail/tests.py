@@ -154,7 +154,7 @@ class TestTemplateEmailSending(TestCase):
 
         m = mail.outbox[0]
         self.assertEqual(m.subject, u'Subject1: foo')
-        self.assertEqual(m.alternatives[0][0], u"<b>Mail1: foo</b>\n")
+        self.assertEqual(m.body, u"<b>Mail1: foo</b>\n")
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
