@@ -32,44 +32,14 @@ def _get_template_extension():
     return getattr(settings, "DJMAIL_TEMPLATE_EXTENSION", "html")
 
 
-def _trap_exception(function):
-    """
-    Simple decorator for catch template exceptions. If exception is throwed,
-    this decorator by default returns an empty string.
-    """
-    @functools.wraps(function)
-    def _decorator(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except TemplateDoesNotExist as e:
-            log.warning("Template '{0}' does not exists.".format(e))
-            return u""
-
-    return _decorator
-
-
-def _trap_language(function):
-    """
-    Decorator that intercept a language attribute and set it on context of
-    the execution.
-    """
-    @functools.wraps(function)
-    def _decorator(self, context):
-        language_new = None
-        language_old = translation.get_language()
-
-        # If attr found on context, set a new language
-        if "lang" in context:
-            language_new = context["lang"]
-            translation.activate(language_new)
-
-        try:
-            return function(self, context)
-        finally:
-            if language_new is not None:
-                translation.activate(language_old)
-
-    return _decorator
+@contextmanager
+def temporary_language(lang):
+    old_language = translation.get_language()
+    try:
+        translation.activate(lang)
+        yield
+    finally:
+        translation.activate(old_language)
 
 
 class TemplateMail(object):
@@ -79,30 +49,33 @@ class TemplateMail(object):
         self._email = None
         if name is not None:
             self.name = name
-
         self._initialize_settings()
 
     def _initialize_settings(self):
         self._body_template_name = _get_body_template_prototype()
         self._subject_template_name = _get_subject_template_prototype()
 
-    @_trap_exception
-    @_trap_language
     def _render_message_body_as_html(self, context):
         template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
             "ext": template_ext, "name": self.name, "type": "html"})
 
-        return loader.render_to_string(template_name, context)
+        try:
+            return loader.render_to_string(template_name, context)
+        except TemplateDoesNotExist as e:
+            log.warning("Template '{0}' does not exists.".format(e))
+            return None
 
-    @_trap_exception
-    @_trap_language
     def _render_message_body_as_txt(self, context):
         template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
             "ext": template_ext, "name": self.name, "type": "text"})
 
-        return loader.render_to_string(template_name, context)
+        try:
+            return loader.render_to_string(template_name, context)
+        except TemplateDoesNotExist as e:
+            log.warning("Template '{0}' does not exists.".format(e))
+            return None
 
     def _render_message_subject(self, context):
         template_ext = _get_template_extension()
@@ -115,9 +88,14 @@ class TemplateMail(object):
             raise exc.TemplateNotFound("Template '{0}' does not exists.".format(e))
         return u" ".join(subject.strip().split())
 
-    def _attach_body_to_email_instance(self, email, context):
-        body_html = self._render_message_body_as_html(context)
-        body_txt = self._render_message_body_as_txt(context)
+    def make_email_object(self, to, context, **kwargs):
+        if not isinstance(to, (list, tuple)):
+            to = [to]
+
+        lang = context.get("lang", settings.LANGUAGE_CODE)
+        with language(lang):
+            body_html = self._render_message_body_as_html(context)
+            body_txt = self._render_message_body_as_txt(context)
 
         if not body_txt and not body_html:
             raise exc.TemplateNotFound("Body of email message shouldn't be empty")
