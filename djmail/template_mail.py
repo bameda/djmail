@@ -105,7 +105,7 @@ class TemplateMail(object):
             email.body = body_txt
             email.attach_alternative(body_html, "text/html")
 
-        else if not body_txt and body_html:
+        elif not body_txt and body_html:
             email = mail.EmailMessage(**kwargs)
             email.content_subtype = "html"
             email.body = body_html
