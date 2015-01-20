@@ -15,6 +15,8 @@ DATABASES = {
     }
 }
 
+MIDDLEWARE_CLASSES = ()
+
 TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en-us'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
