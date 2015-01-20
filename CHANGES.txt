@@ -8,11 +8,13 @@ Version 0.10
 - Refactored email rendering making it more efficient using translation switching.
 - Better handling different type of emails (html-only, text-only and both).
 
+
 Version 0.9
 -----------
 
 - code cleaning (pep8) (by @davidfischer-ch)
 - fix wrong parameters on management command (by @mathieuhinderyckx)
+
 
 Version 0.8
 -----------
