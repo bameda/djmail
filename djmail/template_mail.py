@@ -1,24 +1,19 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 
 import functools
 import logging
+from contextlib import contextmanager
 
 from django.conf import settings
 from django.core import mail
 from django.utils import translation
-try:
-    # Django >= 1.4.5
-    from django.utils.six import string_types
-except ImportError:
-    # Django < 1.4.5
-    string_types = basestring
+from django.utils.six import string_types
 from django.template import loader, TemplateDoesNotExist
 
 from . import models
 from . import exceptions as exc
-
 
 log = logging.getLogger("djmail")
 
