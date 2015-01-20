@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 0.10
+------------
+
+- Drop compatibility with django 1.4
+- Refactored email rendering making it more efficient using translation switching.
+- Better handling different type of emails (html-only, text-only and both).
+
 Version 0.9
 -----------
 
