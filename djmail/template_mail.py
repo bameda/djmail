@@ -100,22 +100,23 @@ class TemplateMail(object):
         if not body_txt and not body_html:
             raise exc.TemplateNotFound("Body of email message shouldn't be empty")
 
-        email.body = body_txt
-        if isinstance(email, mail.EmailMultiAlternatives):
+        if body_txt and body_html:
+            email = mail.EmailMultiAlternatives(**kwargs)
+            email.body = body_txt
             email.attach_alternative(body_html, "text/html")
 
-    def _attach_subject_to_email_instance(self, email, context):
+        else if not body_txt and body_html:
+            email = mail.EmailMessage(**kwargs)
+            email.content_subtype = "html"
+            email.body = body_html
+
+        else:
+            email = mail.EmailMessage(**kwargs)
+            email.body = body_txt
+
+        email.to = to
         email.subject = self._render_message_subject(context)
 
-    def make_email_object(self, to, context, **kwargs):
-        if not isinstance(to, (list, tuple)):
-            to = [to]
-
-        email = mail.EmailMultiAlternatives(**kwargs)
-        email.to = to
-
-        self._attach_body_to_email_instance(email, context)
-        self._attach_subject_to_email_instance(email, context)
         return email
 
     def send(self, to, context, **kwargs):
@@ -124,7 +125,6 @@ class TemplateMail(object):
 
 
 class InlineCSSTemplateMail(TemplateMail):
-
     def _render_message_body_as_html(self, context):
         # Transform CSS into line style attributes
         import premailer
@@ -157,7 +157,6 @@ class MagicMailBuilder(object):
             template_email = self._template_mail_cls(name=name)
             email_instance = template_email.make_email_object(to, context)
             email_instance.priority = priority
-
             return email_instance
 
         return _dynamic_email_generator
