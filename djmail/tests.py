@@ -7,7 +7,10 @@ from django.test.utils import override_settings
 
 from . import models
 from . import core
-from .template_mail import TemplateMail, MagicMailBuilder
+from .template_mail import TemplateMail
+from .template_mail import MagicMailBuilder
+from .template_mail import make_email
+
 
 
 class TestEmailSending(TestCase):
@@ -190,6 +193,37 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(email.body, u"body\n")
         self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
 
+    def test_simple_email_building(self):
+        email = make_email("test_email1",
+                           to="to@example.com",
+                           context={"name": "foo"})
+
+        self.assertEqual(email.subject, u'Subject1: foo')
+        self.assertEqual(email.body, u"<b>Mail1: foo</b>\n")
+
+    def test_proper_handlign_different_uses_cases(self):
+        from django.core import mail
+
+        email1 = make_email("test_email1",
+                            to="to@example.com",
+                            context={"name": "foo"})
+
+        email2 = make_email("test_email2",
+                            to="to@example.com",
+                            context={"name": "foo"})
+
+        email3 = make_email("test_email3",
+                            to="to@example.com",
+                            context={"name": "foo"})
+
+        self.assertIsInstance(email1, mail.EmailMessage)
+        self.assertEqual(email1.content_subtype, "html")
+
+        self.assertIsInstance(email2, mail.EmailMultiAlternatives)
+
+        self.assertIsInstance(email3, mail.EmailMessage)
+        self.assertEqual(email3.content_subtype, "plain")
+
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
         DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
@@ -234,10 +268,3 @@ class SerializationEmailTests(TestCase):
         self.assertEqual(email.to, model.to_email.split(","))
         self.assertEqual(email.subject, model.subject)
         self.assertEqual(email.body, model.body_text)
-
-        # self.assertEqual(len(mail.outbox), 1)
-        # self.assertEqual(models.Message.objects.count(), 1)
-
-        # self.assertEqual(email.subject, u'Subject2: foo')
-        # self.assertEqual(email.body, u"body\n")
-        # self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
