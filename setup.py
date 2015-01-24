@@ -9,7 +9,7 @@ setup(
     url="https://github.com/niwibe/djmail",
     author="Andrey Antukh",
     author_email="niwi@niwi.be",
-    version="0.9",
+    version="0.10.0",
     packages=find_packages(exclude=['contrib', 'docs', 'test*']),
     description=description.strip(),
     zip_safe=False,
