@@ -162,3 +162,13 @@ class MagicMailBuilder(object):
             return email_instance
 
         return _dynamic_email_generator
+
+
+def make_email(name, to, context=None, template_mail_cls=TemplateMail, **kwargs):
+    """
+    Helper for build email objects.
+    """
+    if context is None:
+        context = {"to": to}
+    instance = template_mail_cls(name)
+    return instance.make_email_object(to, context, **kwargs)
