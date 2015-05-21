@@ -94,6 +94,7 @@ class TemplateMail(object):
 
         lang = context.get("lang", settings.LANGUAGE_CODE)
         with language(lang):
+            subject = self._render_message_subject(context)
             body_html = self._render_message_body_as_html(context)
             body_txt = self._render_message_body_as_txt(context)
 
@@ -115,7 +116,7 @@ class TemplateMail(object):
             email.body = body_txt
 
         email.to = to
-        email.subject = self._render_message_subject(context)
+        email.subject = subject
 
         return email
 
