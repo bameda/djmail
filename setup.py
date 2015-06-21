@@ -9,6 +9,8 @@ setup(
     url="https://github.com/niwibe/djmail",
     author="Andrey Antukh",
     author_email="niwi@niwi.be",
+    maintainer="David Barragán Merino",
+    maintainer_email="bameda@dbarraagan.com",
     license='BSD',
     version="0.10.0",
     packages=find_packages(exclude=['contrib', 'docs', 'test*']),
