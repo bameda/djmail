@@ -12,7 +12,7 @@ setup(
     maintainer="David Barragán Merino",
     maintainer_email="bameda@dbarraagan.com",
     license='BSD',
-    version="0.10.0",
+    version="0.11.0",
     packages=find_packages(exclude=['contrib', 'docs', 'test*']),
     description=description.strip(),
     zip_safe=False,
@@ -37,5 +37,5 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Topic :: Software Development :: Libraries",
         "Topic :: Utilities",
-    ],
+    ]
 )

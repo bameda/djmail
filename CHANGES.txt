@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 0.11
+------------
+
+- Translate email subject.
+- Now the project will be maintened by David Barragan (@bameda).
+
+
 Version 0.10
 ------------
 

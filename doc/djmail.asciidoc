@@ -1,7 +1,7 @@
 djmail documentation
 ====================
-Andrey Antukh, <niwi@niwi.be>
-0.9.0, 2014-09-13
+David Barragan, <bameda@dbarragan.com>
+0.11.0, 2015-09-07
 
 :toc:
 :numbered:
@@ -11,6 +11,7 @@ Introduction
 ------------
 
 _djmail_ is a xref:license[BSD Licensed], simple and nonobstructive django email middleware.
+_djmail_ was created by Andrey Antukh <niwi@niwi.be> and is maintened by David Barragán <bameda@dbarragan.com>
 
 
 Why use djmail?
@@ -202,7 +203,8 @@ License
 
 [source,text]
 ----
-Copyright (c) 2013-2014 Andrey Antukh <niwi@niwi.be>
+Copyright (c) 2013-2015 Andrey Antukh <niwi@niwi.be>
+Copyright (c) 2015 David Barragan <bameda@dbarragan.com>
 
 All rights reserved.
 
