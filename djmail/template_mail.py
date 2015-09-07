@@ -92,7 +92,7 @@ class TemplateMail(object):
         if not isinstance(to, (list, tuple)):
             to = [to]
 
-        lang = context.get("lang", settings.LANGUAGE_CODE)
+        lang = context.get("lang", None) or settings.LANGUAGE_CODE
         with language(lang):
             subject = self._render_message_subject(context)
             body_html = self._render_message_body_as_html(context)
