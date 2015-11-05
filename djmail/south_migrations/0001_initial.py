@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
@@ -9,7 +12,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding model 'Message'
-        db.create_table(u'djmail_message', (
+        db.create_table('djmail_message', (
             ('uuid', self.gf('django.db.models.fields.CharField')(default='e4fca98e-8cff-11e4-92de-70188bfc3fc1', max_length=40, primary_key=True)),
             ('from_email', self.gf('django.db.models.fields.CharField')(max_length=1024, blank=True)),
             ('to_email', self.gf('django.db.models.fields.TextField')(blank=True)),
@@ -24,16 +27,16 @@ class Migration(SchemaMigration):
             ('sent_at', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
             ('exception', self.gf('django.db.models.fields.TextField')(blank=True)),
         ))
-        db.send_create_signal(u'djmail', ['Message'])
+        db.send_create_signal('djmail', ['Message'])
 
 
     def backwards(self, orm):
         # Deleting model 'Message'
-        db.delete_table(u'djmail_message')
+        db.delete_table('djmail_message')
 
 
     models = {
-        u'djmail.message': {
+        'djmail.message': {
             'Meta': {'ordering': "[u'created_at']", 'object_name': 'Message'},
             'body_html': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'body_text': ('django.db.models.fields.TextField', [], {'blank': 'True'}),

@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from djmail import core
 
 from . import base
