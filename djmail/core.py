@@ -78,20 +78,20 @@ def _send_messages(email_messages):
 
     # Open connection for send all messages
     connection.open()
+    try:
+        sended_counter = 0
+        for email, model_instance in zip(email_messages, email_models):
+            if hasattr(email, "priority"):
+                if email.priority <= models.PRIORITY_LOW:
+                    model_instance.priority = email.priority
+                    model_instance.status = models.STATUS_PENDING
+                    model_instance.save()
+                    sended_counter += 1
+                    continue
 
-    sended_counter = 0
-    for email, model_instance in zip(email_messages, email_models):
-        if hasattr(email, "priority"):
-            if email.priority <= models.PRIORITY_LOW:
-                model_instance.priority = email.priority
-                model_instance.status = models.STATUS_PENDING
-                model_instance.save()
-                sended_counter += 1
-                continue
-
-        sended_counter += _safe_send_message(model_instance, connection)
-
-    connection.close()
+            sended_counter += _safe_send_message(model_instance, connection)
+    finally:
+        connection.close()
     return sended_counter
 
 
@@ -103,13 +103,13 @@ def _send_pending_messages():
                                      .order_by("-priority", "created_at")
     connection = _get_real_backend()
     connection.open()
-
-    sended_counter = 0
-    for message_model in _chunked_iterate_queryset(queryset, 100):
-        # Use one unique connection for send all messages
-        sended_counter += _safe_send_message(message_model, connection)
-
-    connection.close()
+    try:
+        sended_counter = 0
+        for message_model in _chunked_iterate_queryset(queryset, 100):
+            # Use one unique connection for sending all messages
+            sended_counter += _safe_send_message(message_model, connection)
+    finally:
+        connection.close()
     return sended_counter
 
 
@@ -124,12 +124,12 @@ def _retry_send_messages():
 
     connection = _get_real_backend()
     connection.open()
-
-    sended_counter = 0
-    for message_model in _chunked_iterate_queryset(queryset, 100):
-        sended_counter += _safe_send_message(message_model, connection)
-
-    connection.close()
+    try:
+        sended_counter = 0
+        for message_model in _chunked_iterate_queryset(queryset, 100):
+            sended_counter += _safe_send_message(message_model, connection)
+    finally:
+        connection.close()
     return sended_counter
 
 
