@@ -27,11 +27,9 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('djmail', ['Message'])
 
-
     def backwards(self, orm):
         # Deleting model 'Message'
         db.delete_table('djmail_message')
-
 
     models = {
         'djmail.message': {

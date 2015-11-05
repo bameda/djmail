@@ -14,7 +14,6 @@ from .template_mail import MagicMailBuilder
 from .template_mail import make_email
 
 
-
 class TestEmailSending(TestCase):
     def setUp(self):
         models.Message.objects.all().delete()
