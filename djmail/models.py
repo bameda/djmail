@@ -6,6 +6,9 @@ import base64
 import pickle
 import uuid
 
+from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 try:
     # Django >= 1.4.5
     from django.utils.encoding import force_bytes, force_text
@@ -13,11 +16,6 @@ except ImportError:
     # Django < 1.4.5
     from django.utils.encoding import (
         smart_unicode as force_text, smart_str as force_bytes)
-from django.db import models
-
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
-
 
 STATUS_DRAFT = 10
 STATUS_PENDING = 20

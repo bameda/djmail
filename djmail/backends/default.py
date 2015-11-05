@@ -2,9 +2,8 @@
 
 from __future__ import unicode_literals
 
-from djmail import core
-
 from . import base
+from .. import core
 
 
 class EmailBackend(base.BaseEmailBackend):

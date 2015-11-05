@@ -2,8 +2,8 @@
 
 from __future__ import absolute_import
 
-from djmail.backends import base
-from djmail import tasks
+from . import base
+from .. import tasks
 
 
 class EmailBackend(base.BaseEmailBackend):

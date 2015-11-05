@@ -6,9 +6,9 @@ import functools
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from django.db import connection
-from djmail import core
 
 from . import base
+from .. import core
 
 # TODO: parametrize this
 executor = ThreadPoolExecutor(max_workers=1)
