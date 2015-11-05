@@ -8,7 +8,7 @@ from . import base
 
 
 class EmailBackend(base.BaseEmailBackend):
-    def _send_messages(self, email_messages):
+    def send_messages(self, email_messages):
         if len(email_messages) == 0:
             return 0
 

@@ -35,7 +35,7 @@ class EmailBackend(base.BaseEmailBackend):
     for send emails instead of other async task
     libraries like celery.
     """
-    def _send_messages(self, email_messages):
+    def send_messages(self, email_messages):
         if len(email_messages) == 0:
             future = Future()
             future.set_result(0)
