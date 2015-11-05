@@ -11,16 +11,11 @@ from django.conf import settings
 from django.core.mail import get_connection
 from django.core.paginator import Paginator
 from django.utils import timezone
+StringIO = io.BytesIO if sys.version_info[0] == 2 else io.StringIO
 
 from . import models
 
-
-PY2 = sys.version_info[0] == 2
-StringIO = io.StringIO
-if PY2:
-    StringIO = io.BytesIO
-
-logger = logging.getLogger('djmail')
+logger = logging.getLogger(__name__)
 
 
 def _chunked_iterate_queryset(queryset, chunk_size=10):
