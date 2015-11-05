@@ -1,12 +1,14 @@
 # -*- encoding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import functools
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from django.db import connection
-from djmail import core
 
 from . import base
+from .. import core
 
 # TODO: parametrize this
 executor = ThreadPoolExecutor(max_workers=1)
@@ -15,7 +17,7 @@ executor = ThreadPoolExecutor(max_workers=1)
 def _close_connection_on_finish(function):
     """
     Decorator for future task, that closes
-    django database connection when it ends.
+    Django database connection when it ends.
     """
     @functools.wraps(function)
     def _decorator(*args, **kwargs):
@@ -29,11 +31,10 @@ def _close_connection_on_finish(function):
 
 class EmailBackend(base.BaseEmailBackend):
     """
-    djmail async backend that uses threadpool
-    for send emails instead of other async task
-    libraries like celery.
+    Asynchronous email back-end that uses a
+    thread pool for sending emails.
     """
-    def _send_messages(self, email_messages):
+    def send_messages(self, email_messages):
         if len(email_messages) == 0:
             future = Future()
             future.set_result(0)

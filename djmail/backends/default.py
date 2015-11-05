@@ -1,12 +1,17 @@
 # -*- encoding: utf-8 -*-
 
-from djmail import core
+from __future__ import unicode_literals
 
 from . import base
+from .. import core
 
 
 class EmailBackend(base.BaseEmailBackend):
-    def _send_messages(self, email_messages):
+    """
+    Default email back-end that sends e-mails
+    synchronously.
+    """
+    def send_messages(self, email_messages):
         if len(email_messages) == 0:
             return 0
 

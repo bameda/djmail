@@ -1,12 +1,13 @@
 # -*- encoding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 
 class BaseEmailBackend(object):
     """
-    Base class that implements a django
-    mail backend interface.
+    Base class that implements a Django
+    mail back-end interface.
     """
-
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -17,8 +18,5 @@ class BaseEmailBackend(object):
     def close(self):
         pass
 
-    def _send_messages(self, email_messages):
-        raise NotImplementedError
-
     def send_messages(self, email_messages):
-        return self._send_messages(email_messages)
+        raise NotImplementedError
