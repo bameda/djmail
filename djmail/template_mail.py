@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-import functools
 import logging
 from contextlib import contextmanager
 
