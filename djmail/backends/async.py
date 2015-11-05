@@ -17,7 +17,7 @@ executor = ThreadPoolExecutor(max_workers=1)
 def _close_connection_on_finish(function):
     """
     Decorator for future task, that closes
-    django database connection when it ends.
+    Django database connection when it ends.
     """
     @functools.wraps(function)
     def _decorator(*args, **kwargs):
@@ -31,9 +31,8 @@ def _close_connection_on_finish(function):
 
 class EmailBackend(base.BaseEmailBackend):
     """
-    djmail async backend that uses threadpool
-    for send emails instead of other async task
-    libraries like celery.
+    Asynchronous email back-end that uses a
+    thread pool for sending emails.
     """
     def send_messages(self, email_messages):
         if len(email_messages) == 0:

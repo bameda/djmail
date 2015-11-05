@@ -25,8 +25,8 @@ logger = logging.getLogger('djmail')
 
 def _chunked_iterate_queryset(queryset, chunk_size=10):
     """
-    Given a queryset, use paginator for iterate over all queryset
-    but obtaining from database delimeted set of result parametrized
+    Given a queryset, use a paginator for iterating over the queryset
+    but obtaining from database delimited set of result parametrized
     with `chunk_size` parameter.
     """
     paginator = Paginator(queryset, chunk_size)
@@ -38,9 +38,9 @@ def _chunked_iterate_queryset(queryset, chunk_size=10):
 
 def _safe_send_message(message_model, connection):
     """
-    Given a message model, try send it, if send process
-    is fail, increment retry count and save stack trace
-    in message model.
+    Given a message model, try to send it, if it fails,
+    increment retry count and save stack trace in
+    message model.
     """
     email = message_model.get_email_message()
     sended = 0
@@ -102,7 +102,7 @@ def _send_messages(email_messages):
 
 def _send_pending_messages():
     """
-    Function that sends pending, low priority messages.
+    Send pending, low priority messages.
     """
     queryset = models.Message.objects.filter(status=models.STATUS_PENDING)\
                                      .order_by("-priority", "created_at")
@@ -120,7 +120,7 @@ def _send_pending_messages():
 
 def _retry_send_messages():
     """
-    Function that retry send failed messages.
+    Retry to send failed messages.
     """
     max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED)\
@@ -140,10 +140,9 @@ def _retry_send_messages():
 
 def _mark_discarded_messages():
     """
-    Function that search messaged that exceds the global retry
-    number and marks its as discarded messages.
+    Search messages exceeding the global retry
+    limit and marks them as discarded.
     """
-
     max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED,
                                              retry_count__gt=max_retry_value)

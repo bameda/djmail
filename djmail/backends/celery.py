@@ -8,8 +8,8 @@ from djmail import tasks
 
 class EmailBackend(base.BaseEmailBackend):
     """
-    djmail backend that uses celery task for
-    send emails.
+    Asynchronous email back-end that uses
+    Celery task for sending emails.
     """
     def send_messages(self, email_messages):
         if len(email_messages) == 0:
