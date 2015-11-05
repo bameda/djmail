@@ -57,9 +57,7 @@ class TestEmailSending(TestCase):
         self.assertEqual(number_sent_emails, 0)
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
-
-        mailmodel = models.Message.objects.get()
-        self.assertEqual(mailmodel.status, models.STATUS_FAILED)
+        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.async.EmailBackend",
@@ -73,9 +71,7 @@ class TestEmailSending(TestCase):
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
-
-        mailmodel = models.Message.objects.get()
-        self.assertEqual(mailmodel.status, models.STATUS_FAILED)
+        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.celery.EmailBackend",
@@ -100,9 +96,7 @@ class TestEmailSending(TestCase):
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
-
-        mailmodel = models.Message.objects.get()
-        self.assertEqual(mailmodel.status, models.STATUS_FAILED)
+        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.celery.EmailBackend",
@@ -190,8 +184,8 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(models.Message.objects.count(), 1)
 
-        self.assertEqual(email.subject, u'Subject2: foo')
-        self.assertEqual(email.body, u"body\n")
+        self.assertEqual(email.subject, 'Subject2: foo')
+        self.assertEqual(email.body, "body\n")
         self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
 
     def test_simple_email_building(self):
@@ -199,8 +193,8 @@ class TestTemplateEmailSending(TestCase):
                            to="to@example.com",
                            context={"name": "foo"})
 
-        self.assertEqual(email.subject, u'Subject1: foo')
-        self.assertEqual(email.body, u"<b>Mail1: foo</b>\n")
+        self.assertEqual(email.subject, 'Subject1: foo')
+        self.assertEqual(email.body, "<b>Mail1: foo</b>\n")
 
     def test_proper_handlign_different_uses_cases(self):
         from django.core import mail
