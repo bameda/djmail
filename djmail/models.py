@@ -2,20 +2,14 @@
 
 from __future__ import unicode_literals
 
-import base64
-import pickle
 import uuid
 
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-try:
-    # Django >= 1.4.5
-    from django.utils.encoding import force_bytes, force_text
-except ImportError:
-    # Django < 1.4.5
-    from django.utils.encoding import (
-        smart_unicode as force_text, smart_str as force_bytes)
+
+from . import utils
+
 
 STATUS_DRAFT = 10
 STATUS_PENDING = 20
@@ -54,8 +48,7 @@ class Message(models.Model):
     exception = models.TextField(editable=True, blank=True)
 
     def get_email_message(self):
-        raw_pickle_data = base64.b64decode(force_bytes(self.data))
-        return pickle.loads(raw_pickle_data)
+        return utils.deserialize_email_message(self.data)
 
     @classmethod
     def from_email_message(cls, email_message, save=False):
@@ -64,11 +57,11 @@ class Message(models.Model):
             return 'body_{}'.format('html' if body_type.split('/')[-1] == 'html' else 'text')
 
         kwargs = {
-            'from_email': force_text(email_message.from_email),
-            'to_email': ','.join(force_text(x) for x in email_message.to),
-            'subject': force_text(email_message.subject),
-            'data': base64.b64encode(pickle.dumps(email_message)),
-            get_body_key(email_message.content_subtype): force_text(email_message.body)
+            "from_email": utils.force_text(email_message.from_email),
+            "to_email": ",".join(utils.force_text(x) for x in email_message.to),
+            "subject": utils.force_text(email_message.subject),
+            "data": utils.serialize_email_message(email_message),
+            get_body_key(email_message.content_subtype): utils.force_text(email_message.body)
         }
 
         # Update the body (if missing) from the alternatives
