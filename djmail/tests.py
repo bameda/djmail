@@ -7,6 +7,7 @@ from django.test.utils import override_settings
 
 from . import models
 from . import core
+from . import utils
 from .template_mail import TemplateMail
 from .template_mail import MagicMailBuilder
 from .template_mail import make_email
@@ -253,6 +254,12 @@ class TestTemplateEmailSending(TestCase):
 class SerializationEmailTests(TestCase):
     def setUp(self):
         models.Message.objects.all().delete()
+
+    def test_serialization_loop(self):
+        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
+                             ['to1@example.com', 'to2@example.com'])
+        data = utils.serialize_email_message(email)
+        self.assertEqual(utils.deserialize_email_message(data), email)
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
