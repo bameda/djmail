@@ -68,19 +68,15 @@ class Message(models.Model):
             "data": base64.b64encode(pickle.dumps(email_message)),
         }
 
-        if email_message.content_subtype.endswith("plain"):
-            kwargs["body_text"] = force_text(email_message.body)
-        elif email_message.content_subtype.endswith("html"):
-            kwargs["body_html"] = force_text(email_message.body)
+        # Declare HTML body subtype as text/html else as text/plain
+        key = 'body_' + ('html' if email_message.content_subtype == 'text/html' else 'text')
+        kwargs[key] = force_text(email_message.body)
 
-        try:
-            alt_body, alt_type = email_message.alternatives[0]
-            if not kwargs.get("body_text") and alt_type.endswith("plain"):
-                kwargs["body_text"] = force_text(alt_body)
-            elif not kwargs.get("body_html") and alt_type.endswith("html"):
-                kwargs["body_html"] = force_text(alt_body)
-        except (AttributeError, IndexError):
-            pass
+        # Try to retrieve the HTML body from the alternatives
+        alternatives = getattr(email_message, 'alternatives', None) or []
+        html_alts = [a[0] for a in alternatives if a[1] == 'text/html']
+        if html_alts:
+            kwargs['body_html'] = html_alts[0]
 
         instance = cls(**kwargs)
         if save:
