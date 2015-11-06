@@ -63,7 +63,6 @@ class TemplateMail(object):
             return loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
             log.warning("Template '{0}' does not exists.".format(e))
-            return None
 
     def _render_message_body_as_txt(self, context):
         template_name = self._body_template_name.format(
@@ -72,7 +71,6 @@ class TemplateMail(object):
             return loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
             log.warning("Template '{0}' does not exists.".format(e))
-            return None
 
     def _render_message_subject(self, context):
         template_name = self._subject_template_name.format(
