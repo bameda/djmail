@@ -61,22 +61,21 @@ class Message(models.Model):
 
     @classmethod
     def from_email_message(cls, email_message, save=False):
+        def get_body_key(the_type):
+            """Declare HTML body subtype as text/html else as text/plain."""
+            return 'body_' + ('html' if the_type.split('/')[-1] == 'html' else 'text')
+
         kwargs = {
             "from_email": force_text(email_message.from_email),
             "to_email": ",".join(force_text(x) for x in email_message.to),
+            get_body_key(email_message.content_subtype): force_text(email_message.body),
             "subject": force_text(email_message.subject),
-            "data": base64.b64encode(pickle.dumps(email_message)),
+            "data": base64.b64encode(pickle.dumps(email_message))
         }
 
-        # Declare HTML body subtype as text/html else as text/plain
-        key = 'body_' + ('html' if email_message.content_subtype == 'html' else 'text')
-        kwargs[key] = force_text(email_message.body)
-
-        # Try to retrieve the HTML body from the alternatives
-        alternatives = getattr(email_message, 'alternatives', None) or []
-        html_alts = [a[0] for a in alternatives if a[1] == 'text/html']
-        if html_alts:
-            kwargs['body_html'] = html_alts[0]
+        # Update the body (if missing) from the alternatives
+        for content, the_type in getattr(email_message, 'alternatives', None) or []:
+            kwargs.setdefault(get_body_key(the_type), content)
 
         instance = cls(**kwargs)
         if save:
