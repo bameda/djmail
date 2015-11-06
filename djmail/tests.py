@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 from django.core.mail import EmailMessage
 from django.core import mail
 from django.test import TestCase
@@ -240,6 +242,13 @@ class SerializationEmailTests(EmailTestCaseMixin, TestCase):
     def test_serialization_loop(self):
         data = utils.serialize_email_message(self.email)
         email_bis = utils.deserialize_email_message(data)
+        self.assertEmailEqual(self.email, email_bis)
+
+    def test_json_serialization_loop(self):
+        with self.assertRaises(TypeError):
+            json.dumps(self.email)
+        json_data = json.dumps(utils.serialize_email_message(self.email))
+        email_bis = utils.deserialize_email_message(json.loads(json_data))
         self.assertEmailEqual(self.email, email_bis)
 
     @override_settings(
