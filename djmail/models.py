@@ -66,11 +66,11 @@ class Message(models.Model):
             return 'body_' + ('html' if the_type.split('/')[-1] == 'html' else 'text')
 
         kwargs = {
-            "from_email": force_text(email_message.from_email),
-            "to_email": ",".join(force_text(x) for x in email_message.to),
+            'from_email': force_text(email_message.from_email),
+            'to_email': ','.join(force_text(x) for x in email_message.to),
             get_body_key(email_message.content_subtype): force_text(email_message.body),
-            "subject": force_text(email_message.subject),
-            "data": base64.b64encode(pickle.dumps(email_message))
+            'subject': force_text(email_message.subject),
+            'data': base64.b64encode(pickle.dumps(email_message))
         }
 
         # Update the body (if missing) from the alternatives
