@@ -259,7 +259,11 @@ class SerializationEmailTests(TestCase):
         email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
                              ['to1@example.com', 'to2@example.com'])
         data = utils.serialize_email_message(email)
-        self.assertEqual(utils.deserialize_email_message(data), email)
+        email_bis = utils.deserialize_email_message(data)
+        # Can't do simple equality comparison... That sucks!
+        self.assertEqual(email_bis.__class__, email.__class__)
+        self.assertEqual(email_bis.__dict__, email.__dict__)
+        self.assertEqual(dir(email_bis), dir(email))
 
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
