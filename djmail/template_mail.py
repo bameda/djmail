@@ -66,10 +66,8 @@ class TemplateMail(object):
             return None
 
     def _render_message_body_as_txt(self, context):
-        template_ext = _get_template_extension()
-        template_name = self._body_template_name.format(**{
-            "ext": template_ext, "name": self.name, "type": "text"})
-
+        template_name = self._body_template_name.format(
+            ext=_get_template_extension(), name=self.name, type="text")
         try:
             return loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
@@ -77,10 +75,8 @@ class TemplateMail(object):
             return None
 
     def _render_message_subject(self, context):
-        template_ext = _get_template_extension()
-        template_name = self._subject_template_name.format(**{
-            "ext": template_ext, "name": self.name})
-
+        template_name = self._subject_template_name.format(
+            ext=_get_template_extension(), name=self.name)
         try:
             subject = loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
