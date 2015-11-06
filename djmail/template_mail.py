@@ -14,7 +14,7 @@ from django.template import loader, TemplateDoesNotExist
 from . import models
 from . import exceptions as exc
 
-log = logging.getLogger("djmail")
+log = logging.getLogger(__name__)
 
 
 def _get_body_template_prototype():
