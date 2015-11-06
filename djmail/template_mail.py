@@ -9,7 +9,6 @@ from contextlib import contextmanager
 from django.conf import settings
 from django.core import mail
 from django.utils import translation
-from django.utils.six import string_types
 from django.template import loader, TemplateDoesNotExist
 
 from . import models

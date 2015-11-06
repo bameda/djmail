@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 
 from celery.task import task
-from django.utils.six import binary_type
 
 from . import core
 from . import utils
@@ -14,7 +13,7 @@ def send_messages(messages):
     """
     return core._send_messages([
         utils.deserialize_email_message(m)
-        if isinstance(m, binary_type) else m
+        if isinstance(m, utils.string_types) else m
         for m in messages
     ])
 

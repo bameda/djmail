@@ -4,12 +4,6 @@ from __future__ import unicode_literals
 
 import uuid
 
-try:
-    # Django >= 1.4.5
-    from django.utils.encoding import force_text
-except ImportError:
-    # Django < 1.4.5
-    from django.utils.encoding import smart_unicode as force_text
 from django.db import models
 
 from django.dispatch import receiver
@@ -59,23 +53,23 @@ class Message(models.Model):
     @classmethod
     def from_email_message(cls, email_message, save=False):
         kwargs = {
-            "from_email": force_text(email_message.from_email),
-            "to_email": ",".join(force_text(x) for x in email_message.to),
-            "subject": force_text(email_message.subject),
+            "from_email": utils.force_text(email_message.from_email),
+            "to_email": ",".join(utils.force_text(x) for x in email_message.to),
+            "subject": utils.force_text(email_message.subject),
             "data": utils.serialize_email_message(email_message),
         }
 
         if email_message.content_subtype.endswith("plain"):
-            kwargs["body_text"] = force_text(email_message.body)
+            kwargs["body_text"] = utils.force_text(email_message.body)
         elif email_message.content_subtype.endswith("html"):
-            kwargs["body_html"] = force_text(email_message.body)
+            kwargs["body_html"] = utils.force_text(email_message.body)
 
         try:
             alt_body, alt_type = email_message.alternatives[0]
             if not kwargs.get("body_text") and alt_type.endswith("plain"):
-                kwargs["body_text"] = force_text(alt_body)
+                kwargs["body_text"] = utils.force_text(alt_body)
             elif not kwargs.get("body_html") and alt_type.endswith("html"):
-                kwargs["body_html"] = force_text(alt_body)
+                kwargs["body_html"] = utils.force_text(alt_body)
         except (AttributeError, IndexError):
             pass
 
