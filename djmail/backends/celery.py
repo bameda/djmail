@@ -6,7 +6,7 @@ from django.conf import settings
 
 from djmail.backends import base
 from djmail import tasks
-from . import utils
+from .. import utils
 
 
 class EmailBackend(base.BaseEmailBackend):
