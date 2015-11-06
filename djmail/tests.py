@@ -17,6 +17,7 @@ from .template_mail import make_email
 
 class EmailTestCaseMixin(object):
     def setUp(self):
+        models.Message.objects.all().delete()
         self.email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
                                   ['to1@example.com', 'to2@example.com'])
 
