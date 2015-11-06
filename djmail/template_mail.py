@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from __future__ import unicode_literals
 
@@ -7,12 +7,12 @@ from contextlib import contextmanager
 
 from django.conf import settings
 from django.core import mail
+from django.template import loader, TemplateDoesNotExist
 from django.utils import translation
 from django.utils.six import string_types
-from django.template import loader, TemplateDoesNotExist
 
-from . import models
 from . import exceptions as exc
+from . import models
 
 log = logging.getLogger(__name__)
 
