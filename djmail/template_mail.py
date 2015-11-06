@@ -81,7 +81,7 @@ class TemplateMail(object):
             subject = loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
             raise exc.TemplateNotFound("Template '{0}' does not exists.".format(e))
-        return u" ".join(subject.strip().split())
+        return " ".join(subject.strip().split())
 
     def make_email_object(self, to, context, **kwargs):
         if not isinstance(to, (list, tuple)):
