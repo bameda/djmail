@@ -130,7 +130,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         self.assertEqual(message_model_2.status, models.STATUS_DISCARDED)
 
 
-class TestTemplateEmailSending(TestCase):
+class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
     @override_settings(
         EMAIL_BACKEND="djmail.backends.default.EmailBackend",
         DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
