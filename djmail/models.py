@@ -69,7 +69,7 @@ class Message(models.Model):
         }
 
         # Declare HTML body subtype as text/html else as text/plain
-        key = 'body_' + ('html' if email_message.content_subtype == 'text/html' else 'text')
+        key = 'body_' + ('html' if email_message.content_subtype == 'html' else 'text')
         kwargs[key] = force_text(email_message.body)
 
         # Try to retrieve the HTML body from the alternatives
