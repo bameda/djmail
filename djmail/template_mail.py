@@ -120,7 +120,12 @@ class TemplateMail(object):
 
 class InlineCSSTemplateMail(TemplateMail):
     def _render_message_body_as_html(self, context):
+        """
+        Transform CSS into in-line style attributes.
+        """
+        import premailer
         html = super(InlineCSSTemplateMail, self)._render_message_body_as_html(context)
+        return premailer.transform(html) if html else html
 
         # Transform CSS into line style attributes
         import premailer
