@@ -18,17 +18,17 @@ log = logging.getLogger(__name__)
 
 
 def _get_body_template_prototype():
-    return getattr(settings, "DJMAIL_BODY_TEMPLATE_PROTOTYPE",
-                   "emails/{name}-body-{type}.{ext}")
+    return getattr(settings, 'DJMAIL_BODY_TEMPLATE_PROTOTYPE',
+                   'emails/{name}-body-{type}.{ext}')
 
 
 def _get_subject_template_prototype():
-    return getattr(settings, "DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE",
-                   "emails/{name}-subject.{ext}")
+    return getattr(settings, 'DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE',
+                   'emails/{name}-subject.{ext}')
 
 
 def _get_template_extension():
-    return getattr(settings, "DJMAIL_TEMPLATE_EXTENSION", "html")
+    return getattr(settings, 'DJMAIL_TEMPLATE_EXTENSION', 'html')
 
 
 @contextmanager
@@ -57,7 +57,7 @@ class TemplateMail(object):
     def _render_message_body_as_html(self, context):
         template_ext = _get_template_extension()
         template_name = self._body_template_name.format(**{
-            "ext": template_ext, "name": self.name, "type": "html"})
+            'ext': template_ext, 'name': self.name, 'type': 'html'})
 
         try:
             return loader.render_to_string(template_name, context)
@@ -66,7 +66,7 @@ class TemplateMail(object):
 
     def _render_message_body_as_txt(self, context):
         template_name = self._body_template_name.format(
-            ext=_get_template_extension(), name=self.name, type="text")
+            ext=_get_template_extension(), name=self.name, type='text')
         try:
             return loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
@@ -79,13 +79,13 @@ class TemplateMail(object):
             subject = loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
             raise exc.TemplateNotFound("Template '{0}' does not exists.".format(e))
-        return " ".join(subject.strip().split())
+        return ' '.join(subject.strip().split())
 
     def make_email_object(self, to, context, **kwargs):
         if not isinstance(to, (list, tuple)):
             to = [to]
 
-        lang = context.get("lang", None) or settings.LANGUAGE_CODE
+        lang = context.get('lang', None) or settings.LANGUAGE_CODE
         with language(lang):
             subject = self._render_message_subject(context)
             body_html = self._render_message_body_as_html(context)
@@ -97,11 +97,11 @@ class TemplateMail(object):
         if body_txt and body_html:
             email = mail.EmailMultiAlternatives(**kwargs)
             email.body = body_txt
-            email.attach_alternative(body_html, "text/html")
+            email.attach_alternative(body_html, 'text/html')
 
         elif not body_txt and body_html:
             email = mail.EmailMessage(**kwargs)
-            email.content_subtype = "html"
+            email.content_subtype = 'html'
             email.body = body_html
 
         else:
@@ -128,7 +128,7 @@ class InlineCSSTemplateMail(TemplateMail):
 
 
 class MagicMailBuilder(object):
-    def __init__(self, email_attr="email", lang_attr="lang",
+    def __init__(self, email_attr='email', lang_attr='lang',
                  template_mail_cls=TemplateMail):
         self._email_attr = email_attr
         self._lang_attr = lang_attr
@@ -141,14 +141,14 @@ class MagicMailBuilder(object):
             if not isinstance(to, string_types):
                 if not hasattr(to, self._email_attr):
                     raise AttributeError(
-                        "'to' parameter does not "
-                        "have '{0}' attribute".format(self._email_attr))
+                        "to' parameter does not have '{0._email_attr}' attribute".format(
+                        self))
 
                 lang = getattr(to, self._lang_attr, None)
                 to = getattr(to, self._email_attr)
 
             if lang is not None:
-                context["lang"] = lang
+                context['lang'] = lang
 
             template_email = self._template_mail_cls(name=name)
             email_instance = template_email.make_email_object(to, context)
@@ -163,6 +163,6 @@ def make_email(name, to, context=None, template_mail_cls=TemplateMail, **kwargs)
     Helper for build email objects.
     """
     if context is None:
-        context = {"to": to}
+        context = {'to': to}
     instance = template_mail_cls(name)
     return instance.make_email_object(to, context, **kwargs)

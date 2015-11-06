@@ -63,7 +63,7 @@ def _safe_send_message(message_model, connection):
 def _get_real_backend():
     real_backend_path = getattr(
         settings,
-        "DJMAIL_REAL_BACKEND",
+        'DJMAIL_REAL_BACKEND',
         'django.core.mail.backends.console.EmailBackend')
     return get_connection(backend=real_backend_path, fail_silently=False)
 
@@ -100,7 +100,7 @@ def _send_pending_messages():
     Send pending, low priority messages.
     """
     queryset = models.Message.objects.filter(status=models.STATUS_PENDING)\
-                                     .order_by("-priority", "created_at")
+                                     .order_by('-priority', 'created_at')
     connection = _get_real_backend()
     connection.open()
     try:
@@ -117,10 +117,10 @@ def _retry_send_messages():
     """
     Retry to send failed messages.
     """
-    max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
+    max_retry_value = getattr(settings, 'DJMAIL_MAX_RETRY_NUMBER', 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED)\
                                      .filter(retry_count__lte=max_retry_value)\
-                                     .order_by("-priority", "created_at")
+                                     .order_by('-priority', 'created_at')
 
     connection = _get_real_backend()
     connection.open()
@@ -138,7 +138,7 @@ def _mark_discarded_messages():
     Search messages exceeding the global retry
     limit and marks them as discarded.
     """
-    max_retry_value = getattr(settings, "DJMAIL_MAX_RETRY_NUMBER", 3)
+    max_retry_value = getattr(settings, 'DJMAIL_MAX_RETRY_NUMBER', 3)
     queryset = models.Message.objects.filter(status=models.STATUS_FAILED,
                                              retry_count__gt=max_retry_value)
     return queryset.update(status=models.STATUS_DISCARDED)
