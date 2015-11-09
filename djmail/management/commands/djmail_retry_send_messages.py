@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.core.management.base import NoArgsCommand
 
-from .. import core
+from ... import core
 
 
 class Command(NoArgsCommand):
