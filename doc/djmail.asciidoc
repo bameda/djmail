@@ -106,6 +106,7 @@ usage:
 
 [source,python]
 ----
+from djmail import template_mail
 # Define a subclass of TemplateMail
 class SomeTemplateEmail(template_mail.TemplateMail):
     name = "some_email"
@@ -148,6 +149,7 @@ This is a more powerful way for building email messages from templates. Behind t
 .Example that represents the same behavior as previous example using dynamic api of `MagicMailBuilder`
 [source,python]
 ----
+from djmail import template_mail
 # Create MagicMailBuilder instance
 mails = template_mail.MagicMailBuilder()
 
