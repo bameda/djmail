@@ -55,6 +55,7 @@ To get djmail working on your project, you should configure it:
 ----
 EMAIL_BACKEND="djmail.backends.default.EmailBackend"
 DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
+INSTALLED_APPS += ('djmail',)
 ----
 
 This specifies: emails are managed by djmail default backend and sent using
