@@ -1,50 +1,48 @@
-Changelog
-=========
+# Changelog #
 
-Version 0.11
-------------
+
+## 0.12 (unreleased)
+
+- ...
+
+
+## 0.11 (2014-09-07)
 
 - Translate email subject.
 - Now the project will be maintened by David Barragan (@bameda).
 
 
-Version 0.10
-------------
+## 0.10 (2015-01-21)
 
 - Drop compatibility with django 1.4
 - Refactored email rendering making it more efficient using translation switching.
 - Better handling different type of emails (html-only, text-only and both).
 
 
-Version 0.9
------------
+## 0.9 (2014-09-13)
 
 - code cleaning (pep8) (by @davidfischer-ch)
 - fix wrong parameters on management command (by @mathieuhinderyckx)
 
 
-Version 0.8
------------
+## 0.8 (2014-07-06)
 
 - Fixed errors' handling in python2.
 
 
-Version 0.7
------------
+## 0.7 (2014-06-12)
 
 - Add missing modules not included in the previous version.
 - Django 1.4.x support added.
 - Minor code cleaning.
 
 
-Version 0.6
------------
+## 0.6 (2014-06-05)
 
 - Better control for empty bodies.
 
 
-Version 0.5
------------
+## 0.5 (2013-10-27)
 
 - New documentation.
 - Runtests improvements.
