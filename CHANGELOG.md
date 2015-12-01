@@ -3,7 +3,7 @@
 
 ## 0.12 (unreleased)
 
-- ...
+- Pass extra kwargs to EmailMultiAlternatives in MagicMailBuilder
 
 
 ## 0.11 (2014-09-07)
