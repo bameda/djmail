@@ -9,11 +9,11 @@ from contextlib import contextmanager
 from django.conf import settings
 from django.core import mail
 from django.utils import translation
-from django.utils.six import string_types
 from django.template import loader, TemplateDoesNotExist
 
 from . import models
 from . import exceptions as exc
+from . import utils
 
 log = logging.getLogger("djmail")
 
@@ -145,7 +145,7 @@ class MagicMailBuilder(object):
         def _dynamic_email_generator(to, context, priority=models.PRIORITY_STANDARD, **kwargs):
             lang = None
 
-            if not isinstance(to, string_types):
+            if not isinstance(to, utils.string_types):
                 if not hasattr(to, self._email_attr):
                     raise AttributeError(
                         "'to' parameter does not "
