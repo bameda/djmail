@@ -1,13 +1,11 @@
 sudo: false
 language: python
 
-
 python:
   - "3.5"
   - "3.4"
   - "3.3"
   - "2.7"
-
 
 env:
   - DJANGO="django==1.8.5"
@@ -15,7 +13,6 @@ env:
   - DJANGO="django==1.6.11"
   - DJANGO="django==1.5.12"
   - DJANGO="django==1.4.22"
-
 
 matrix:
   exclude:
@@ -34,20 +31,17 @@ matrix:
     - python: "3.3"
       env: DJANGO="django==1.4.22"
 
-
 install:
-  - pip install $DJANGO
-  - pip install psycopg2==2.6.1
-  - pip install django-celery==3.1.17
-  - pip install futures     # For python 2.7
+  - travis_retry pip install $DJANGO
+  - travis_retry pip install psycopg2==2.6.1
+  - travis_retry pip install django-celery==3.1.17
+  - travis_retry pip install futures     # For python 2.7
 
 services:
   - postgresql
 
-
 before_script:
   - createdb test
-
 
 script:
   - python runtests.py
