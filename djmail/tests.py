@@ -193,6 +193,24 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(email.body, u"body\n")
         self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
 
+    @override_settings(
+        EMAIL_BACKEND="djmail.backends.default.EmailBackend",
+        DJMAIL_REAL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_simple_send_email_with_magic_builder_1_with_extra_kwargs(self):
+        mails = MagicMailBuilder()
+
+        email = mails.test_email2("to@example.com",
+                                  {"name": "foo"},
+                                  from_email="no-reply@test.com")
+        email.send()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+        self.assertEqual(email.subject, u'Subject2: foo')
+        self.assertEqual(email.body, u"body\n")
+        self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
+
     def test_simple_email_building(self):
         email = make_email("test_email1",
                            to="to@example.com",
