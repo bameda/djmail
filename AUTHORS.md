@@ -10,6 +10,7 @@ And here is an inevitably incomplete list of MUCH-APPRECIATED CONTRIBUTORS --
 people who have submitted patches, reported bugs, fix documentationd and
 generally made djmail that much better:
 
+- Adam Dobrawy <naczelnik@jawnosc.tk>
 - Alexandre Macabies
 - David Fischer <david.fischer.ch@gmail.com>
 - Jesús Espino <jespinog@gmail.com>
