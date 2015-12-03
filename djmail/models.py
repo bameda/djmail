@@ -59,26 +59,21 @@ class Message(models.Model):
 
     @classmethod
     def from_email_message(cls, email_message, save=False):
+        def get_body_key(body_type):
+            """Declare HTML body subtype as text/html else as text/plain."""
+            return 'body_{}'.format('html' if body_type.split('/')[-1] == 'html' else 'text')
+
         kwargs = {
             'from_email': force_text(email_message.from_email),
             'to_email': ','.join(force_text(x) for x in email_message.to),
             'subject': force_text(email_message.subject),
             'data': base64.b64encode(pickle.dumps(email_message)),
+            get_body_key(email_message.content_subtype): force_text(email_message.body)
         }
 
-        if email_message.content_subtype.endswith('plain'):
-            kwargs['body_text'] = force_text(email_message.body)
-        elif email_message.content_subtype.endswith('html'):
-            kwargs['body_html'] = force_text(email_message.body)
-
-        try:
-            alt_body, alt_type = email_message.alternatives[0]
-            if not kwargs.get('body_text') and alt_type.endswith('plain'):
-                kwargs['body_text'] = force_text(alt_body)
-            elif not kwargs.get('body_html') and alt_type.endswith('html'):
-                kwargs['body_html'] = force_text(alt_body)
-        except (AttributeError, IndexError):
-            pass
+        # Update the body (if missing) from the alternatives
+        for alt_body, alt_type in getattr(email_message, 'alternatives', None) or []:
+            kwargs.setdefault(get_body_key(alt_type), alt_body)
 
         instance = cls(**kwargs)
         if save:
