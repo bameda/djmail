@@ -3,7 +3,8 @@
 
 ## 0.12 (unreleased)
 
-- Pass extra kwargs to EmailMultiAlternatives in MagicMailBuilder
+- Pass extra kwargs to EmailMultiAlternatives in MagicMailBuilder.
+- Premailer: Fix call when html is None and create a mixin to be more reusable.
 
 
 ## 0.11 (2014-09-07)
