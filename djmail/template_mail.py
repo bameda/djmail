@@ -118,13 +118,18 @@ class TemplateMail(object):
         return email.send()
 
 
-class InlineCSSTemplateMail(TemplateMail):
+class InlineCSSMixin(object):
     def _render_message_body_as_html(self, context):
-        html = super(InlineCSSTemplateMail, self)._render_message_body_as_html(context)
-
-        # Transform CSS into line style attributes
+        """
+        Transform CSS into in-line style attributes.
+        """
         import premailer
-        return premailer.transform(html)
+        html = super(InlineCSSMixin, self)._render_message_body_as_html(context)
+        return premailer.transform(html) if html else html
+
+
+class InlineCSSTemplateMail(InlineCSSMixin, TemplateMail):
+    pass
 
 
 class MagicMailBuilder(object):
