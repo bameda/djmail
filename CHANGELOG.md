@@ -4,8 +4,11 @@
 ## 0.12 (unreleased)
 
 - Pass extra kwargs to EmailMultiAlternatives in MagicMailBuilder.
+  Thanks to @ad-m.
 - Premailer: Fix call when html is None and create a mixin to be more reusable.
+  Thanks to @davidfischer-ch.
 - Declare any non-HTML body as text/plain (e.g. JSON).
+  Thanks to @davidfischer-ch.
 
 
 ## 0.11 (2014-09-07)
