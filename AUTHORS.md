@@ -1,6 +1,6 @@
 The PRIMARY AUTHORS is:
 
-- Andrey Antukh <niwi@niwi.be>
+- Andrey Antukh <niwi@niwi.nz>
 
 Tha ACTUAL MAINTENER is:
 

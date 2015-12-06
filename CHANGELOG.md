@@ -1,7 +1,7 @@
 # Changelog #
 
 
-## 0.12 (unreleased)
+## 0.12 (2015-12-06)
 
 - Pass extra kwargs to EmailMultiAlternatives in MagicMailBuilder.
   Thanks to @ad-m.
@@ -13,7 +13,7 @@
   Thanks to @davidfischer-ch.
 
 
-## 0.11 (2014-09-07)
+## 0.11 (2015-09-07)
 
 - Translate email subject.
 - Now the project will be maintened by David Barragan (@bameda).

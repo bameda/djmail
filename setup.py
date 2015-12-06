@@ -6,13 +6,13 @@ Simple, powerful and non-obstructive django email middleware.
 
 setup(
     name='djmail',
-    url='https://github.com/niwibe/djmail',
+    url='https://github.com/bameda/djmail',
     author='Andrey Antukh',
-    author_email='niwi@niwi.be',
+    author_email='niwi@niwi.nz',
     maintainer='David Barragán Merino',
     maintainer_email='bameda@dbarraagan.com',
     license='BSD',
-    version='0.11.0',
+    version='0.12.0-1',
     packages=find_packages(exclude=['contrib', 'docs', 'test*']),
     description=description.strip(),
     zip_safe=False,
