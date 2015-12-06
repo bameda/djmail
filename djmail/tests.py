@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+import json
+
 from django.core.mail import EmailMessage
 from django.core import mail
 from django.test import TestCase
@@ -9,23 +11,31 @@ from django.test.utils import override_settings
 
 from . import core
 from . import models
+from . import utils
 from .template_mail import TemplateMail
 from .template_mail import MagicMailBuilder
 from .template_mail import make_email
 
 
-class TestEmailSending(TestCase):
+class EmailTestCaseMixin(object):
     def setUp(self):
         models.Message.objects.all().delete()
+        self.email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
+                                  ['to1@example.com', 'to2@example.com'])
 
+    def assertEmailEqual(self, a, b):
+        # Can't do simple equality comparison... That sucks!
+        self.assertEqual(a.__class__, b.__class__)
+        self.assertEqual(a.__dict__, b.__dict__)
+        self.assertEqual(dir(a), dir(b))
+
+
+class TestEmailSending(EmailTestCaseMixin, TestCase):
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_simple_send_email(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-
-        email.send()
+        self.email.send()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(models.Message.objects.count(), 1)
 
@@ -34,12 +44,9 @@ class TestEmailSending(TestCase):
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
         DJMAIL_SEND_ASYNC=True)
     def test_async_send_email(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-        # If async is activated, send method
-        # returns a thread instead of a number of
-        # sent messages.
-        future = email.send()
+        # If async is activated, send method returns a thread instead of
+        # a number of sent messages.
+        future = self.email.send()
         future.result()
 
         self.assertEqual(len(mail.outbox), 1)
@@ -49,10 +56,7 @@ class TestEmailSending(TestCase):
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
         DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
     def test_failing_simple_send_email(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-
-        number_sent_emails = email.send()
+        number_sent_emails = self.email.send()
 
         self.assertEqual(number_sent_emails, 0)
         self.assertEqual(len(mail.outbox), 0)
@@ -63,10 +67,7 @@ class TestEmailSending(TestCase):
         EMAIL_BACKEND='djmail.backends.async.EmailBackend',
         DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
     def test_failing_async_send_email(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-
-        future = email.send()
+        future = self.email.send()
         future.result()
 
         self.assertEqual(len(mail.outbox), 0)
@@ -77,9 +78,7 @@ class TestEmailSending(TestCase):
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_async_send_email_with_celery(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-        result = email.send()
+        result = self.email.send()
         result.wait()
 
         self.assertEqual(len(mail.outbox), 1)
@@ -89,9 +88,7 @@ class TestEmailSending(TestCase):
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
         DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
     def test_failing_async_send_email_with_celery(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-        result = email.send()
+        result = self.email.send()
         result.wait()
 
         self.assertEqual(len(mail.outbox), 0)
@@ -102,9 +99,7 @@ class TestEmailSending(TestCase):
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
         DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
     def test_failing_retry_send_01(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-        message_model = models.Message.from_email_message(email)
+        message_model = models.Message.from_email_message(self.email)
         message_model.status = models.STATUS_FAILED
         message_model.retry_count = 1
         message_model.save()
@@ -119,9 +114,7 @@ class TestEmailSending(TestCase):
         DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend',
         DJMAIL_MAX_RETRY_NUMBER=2)
     def test_failing_retry_send_02(self):
-        email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
-                             ['to1@example.com', 'to2@example.com'])
-        message_model = models.Message.from_email_message(email)
+        message_model = models.Message.from_email_message(self.email)
         message_model.status = models.STATUS_FAILED
         message_model.retry_count = 3
         message_model.save()
@@ -133,10 +126,7 @@ class TestEmailSending(TestCase):
         self.assertEqual(message_model_2.status, models.STATUS_DISCARDED)
 
 
-class TestTemplateEmailSending(TestCase):
-    def setUp(self):
-        models.Message.objects.all().delete()
-
+class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
@@ -263,9 +253,18 @@ class TestTemplateEmailSending(TestCase):
         self.assertEqual(m2.priority, 10)
 
 
-class SerializationEmailTests(TestCase):
-    def setUp(self):
-        models.Message.objects.all().delete()
+class SerializationEmailTests(EmailTestCaseMixin, TestCase):
+    def test_serialization_loop(self):
+        data = utils.serialize_email_message(self.email)
+        email_bis = utils.deserialize_email_message(data)
+        self.assertEmailEqual(self.email, email_bis)
+
+    def test_json_serialization_loop(self):
+        with self.assertRaises(TypeError):
+            json.dumps(self.email)
+        json_data = json.dumps(utils.serialize_email_message(self.email))
+        email_bis = utils.deserialize_email_message(json.loads(json_data))
+        self.assertEmailEqual(self.email, email_bis)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',

@@ -35,3 +35,4 @@ import djcelery
 djcelery.setup_loader()
 
 CELERY_ALWAYS_EAGER = True
+CELERY_TASK_SERIALIZER = 'json'
