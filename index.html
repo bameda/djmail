@@ -21,8 +21,8 @@ asciidoc.install(2);
 <h1>djmail documentation</h1>
 <span id="author">David Barragan,</span><br>
 <span id="email" class="monospaced">&lt;<a href="mailto:bameda@dbarragan.com">bameda@dbarragan.com</a>&gt;</span><br>
-<span id="revnumber">version 0.11.0,</span>
-<span id="revdate">2015-09-07</span>
+<span id="revnumber">version 0.12.0,</span>
+<span id="revdate">2015-12-06</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -33,7 +33,7 @@ asciidoc.install(2);
 <h2 id="_introduction">1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph"><p><em>djmail</em> is a <a href="#license">BSD Licensed</a>, simple and nonobstructive django email middleware.
-<em>djmail</em> was created by Andrey Antukh &lt;<a href="mailto:niwi@niwi.be">niwi@niwi.be</a>&gt; and is maintened by David Barragán &lt;<a href="mailto:bameda@dbarragan.com">bameda@dbarragan.com</a>&gt;</p></div>
+<em>djmail</em> was created by Andrey Antukh &lt;<a href="mailto:niwi@niwi.nz">niwi@niwi.nz</a>&gt; and is maintened by David Barragán &lt;<a href="mailto:bameda@dbarragan.com">bameda@dbarragan.com</a>&gt;</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -109,6 +109,7 @@ Handles priority, with ability to delay sending of messages with lowest priorty
 <div class="title">Example initial development configuration:</div>
 <div class="content"><div class="highlight"><pre><span class="n">EMAIL_BACKEND</span><span class="o">=</span><span class="s">&quot;djmail.backends.default.EmailBackend&quot;</span>
 <span class="n">DJMAIL_REAL_BACKEND</span><span class="o">=</span><span class="s">&quot;django.core.mail.backends.console.EmailBackend&quot;</span>
+<span class="n">INSTALLED_APPS</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;djmail&#39;</span><span class="p">,)</span>
 </pre></div></div></div>
 <div class="paragraph"><p>This specifies: emails are managed by djmail default backend and sent using
 console based django builtin backend.</p></div>
@@ -171,7 +172,8 @@ emails the way you did before.</p></div>
 <div class="paragraph"><p>This is a low level interface for buiding emails using templates. It allows to statically define email classes for posterior
 usage:</p></div>
 <div class="listingblock">
-<div class="content"><div class="highlight"><pre><span class="c"># Define a subclass of TemplateMail</span>
+<div class="content"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">djmail</span> <span class="kn">import</span> <span class="n">template_mail</span>
+<span class="c"># Define a subclass of TemplateMail</span>
 <span class="k">class</span> <span class="nc">SomeTemplateEmail</span><span class="p">(</span><span class="n">template_mail</span><span class="o">.</span><span class="n">TemplateMail</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;some_email&quot;</span>
 
@@ -224,7 +226,8 @@ usage:</p></div>
 <span class="monospaced">TemplateMail</span> implementation but exposes a dynamic api that allows building of subclasses on demand.</p></div>
 <div class="listingblock">
 <div class="title">Example that represents the same behavior as previous example using dynamic api of <span class="monospaced">MagicMailBuilder</span></div>
-<div class="content"><div class="highlight"><pre><span class="c"># Create MagicMailBuilder instance</span>
+<div class="content"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">djmail</span> <span class="kn">import</span> <span class="n">template_mail</span>
+<span class="c"># Create MagicMailBuilder instance</span>
 <span class="n">mails</span> <span class="o">=</span> <span class="n">template_mail</span><span class="o">.</span><span class="n">MagicMailBuilder</span><span class="p">()</span>
 
 <span class="c"># Create a native email object.</span>
@@ -303,7 +306,7 @@ for rendering email in user locale.</p></div>
 <h2 id="license">6. License</h2>
 <div class="sectionbody">
 <div class="listingblock">
-<div class="content"><div class="highlight"><pre>Copyright (c) 2013-2015 Andrey Antukh &lt;niwi@niwi.be&gt;
+<div class="content"><div class="highlight"><pre>Copyright (c) 2013-2015 Andrey Antukh &lt;niwi@niwi.nz&gt;
 Copyright (c) 2015 David Barragan &lt;bameda@dbarragan.com&gt;
 
 All rights reserved.
@@ -336,8 +339,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Version 0.11.0<br>
-Last updated 2015-09-07 18:56:18 CEST
+Version 0.12.0<br>
+Last updated 2015-12-06 22:22:42 CET
 </div>
 </div>
 </body>
