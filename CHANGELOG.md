@@ -1,6 +1,12 @@
 # Changelog #
 
 
+## 0.13 (2016-05-29)
+
+- Add compatibility with django 1.10.
+  Thanks to @ad-m.
+
+
 ## 0.12 (2015-12-06)
 
 - Pass extra kwargs to EmailMultiAlternatives in MagicMailBuilder.
