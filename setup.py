@@ -12,7 +12,7 @@ setup(
     maintainer='David Barragán Merino',
     maintainer_email='bameda@dbarraagan.com',
     license='BSD',
-    version='0.13.0',
+    version='0.13.1',
     packages=find_packages(exclude=['contrib', 'docs', 'test*']),
     description=description.strip(),
     zip_safe=False,

@@ -1,7 +1,7 @@
 djmail documentation
 ====================
 David Barragan, <bameda@dbarragan.com>
-0.13.0, 2016-05-29
+0.13.1, 2016-11-14
 
 :toc:
 :numbered:

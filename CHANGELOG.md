@@ -1,6 +1,12 @@
 # Changelog #
 
 
+## 0.13.1 (2016-11-14)
+
+- Fix management command 'djmail_retry_send_messages',
+  now is compatibile with django 1.10.
+
+
 ## 0.13 (2016-05-29)
 
 - Add compatibility with django 1.10.
