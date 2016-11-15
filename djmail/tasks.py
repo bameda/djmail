@@ -1,14 +1,13 @@
 # -*- encoding: utf-8 -*-
 
-from __future__ import unicode_literals
-
-from celery.task import task
+from __future__ import absolute_import, unicode_literals
+from celery import shared_task
 
 from . import core
 from . import utils
 
 
-@task(name='tasks.send_messages')
+@shared_task
 def send_messages(messages):
     """
     Celery standard task for sending messages asynchronously.
@@ -20,7 +19,7 @@ def send_messages(messages):
     ])
 
 
-@task(name='tasks.retry_send_messages')
+@shared_task
 def retry_send_messages():
     """
     Celery periodic task retrying to send failed messages.

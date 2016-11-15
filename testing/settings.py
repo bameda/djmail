@@ -27,7 +27,6 @@ STATICFILES_DIRS = ()
 SECRET_KEY = 'di!n($kqa3)nd%ikad#kcjpkd^uw*h%*kj=*pm7$vbo6ir7h=l'
 INSTALLED_APPS = (
     'djmail',
-    'djcelery',
     'testing',
 )
 
@@ -48,8 +47,17 @@ TEMPLATES = [
     },
 ]
 
-import djcelery
-djcelery.setup_loader()
 
 CELERY_ALWAYS_EAGER = True
 CELERY_TASK_SERIALIZER = 'json'
+
+
+# docker run -d --hostname my-rabbit -p 5672:5672 --name my-rabbit rabbitmq:3
+#CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+# docker run --name my-redis -p 6379:6379 -d redis
+CELERY_RESULT_BACKEND = 'redis://'
+
+EMAIL_BACKEND = 'djmail.backends.celery.EmailBackend'
+
+# run celery worker (run in the parent djmail directory, not in the testing subdir):
+# celery -A djmail worker -l info

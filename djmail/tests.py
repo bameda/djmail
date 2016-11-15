@@ -30,6 +30,56 @@ class EmailTestCaseMixin(object):
         self.assertEqual(dir(a), dir(b))
 
 
+@override_settings(EMAIL_BACKEND='djmail.backends.celery.EmailBackend')
+class TestEmailSendingCelery(EmailTestCaseMixin, TestCase):
+    @override_settings(
+        DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_async_send_email_with_celery(self):
+        result = self.email.send()
+        result.wait()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+    @override_settings(
+        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+    def test_failing_async_send_email_with_celery(self):
+        result = self.email.send()
+        result.wait()
+
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
+
+    @override_settings(
+        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+    def test_failing_retry_send_01(self):
+        message_model = models.Message.from_email_message(self.email)
+        message_model.status = models.STATUS_FAILED
+        message_model.retry_count = 1
+        message_model.save()
+
+        core._retry_send_messages()
+
+        message_model_2 = models.Message.objects.get(pk=message_model.pk)
+        self.assertEqual(message_model_2.retry_count, 2)
+
+    @override_settings(
+        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend',
+        DJMAIL_MAX_RETRY_NUMBER=2)
+    def test_failing_retry_send_02(self):
+        message_model = models.Message.from_email_message(self.email)
+        message_model.status = models.STATUS_FAILED
+        message_model.retry_count = 3
+        message_model.save()
+
+        core._mark_discarded_messages()
+
+        message_model_2 = models.Message.objects.get(pk=message_model.pk)
+        self.assertEqual(message_model_2.retry_count, 3)
+        self.assertEqual(message_model_2.status, models.STATUS_DISCARDED)
+
+
 class TestEmailSending(EmailTestCaseMixin, TestCase):
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
@@ -73,57 +123,6 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
         self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
-
-    @override_settings(
-        EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
-    def test_async_send_email_with_celery(self):
-        result = self.email.send()
-        result.wait()
-
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
-
-    @override_settings(
-        EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
-    def test_failing_async_send_email_with_celery(self):
-        result = self.email.send()
-        result.wait()
-
-        self.assertEqual(len(mail.outbox), 0)
-        self.assertEqual(models.Message.objects.count(), 1)
-        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
-
-    @override_settings(
-        EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
-    def test_failing_retry_send_01(self):
-        message_model = models.Message.from_email_message(self.email)
-        message_model.status = models.STATUS_FAILED
-        message_model.retry_count = 1
-        message_model.save()
-
-        core._retry_send_messages()
-
-        message_model_2 = models.Message.objects.get(pk=message_model.pk)
-        self.assertEqual(message_model_2.retry_count, 2)
-
-    @override_settings(
-        EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend',
-        DJMAIL_MAX_RETRY_NUMBER=2)
-    def test_failing_retry_send_02(self):
-        message_model = models.Message.from_email_message(self.email)
-        message_model.status = models.STATUS_FAILED
-        message_model.retry_count = 3
-        message_model.save()
-
-        core._mark_discarded_messages()
-
-        message_model_2 = models.Message.objects.get(pk=message_model.pk)
-        self.assertEqual(message_model_2.retry_count, 3)
-        self.assertEqual(message_model_2.status, models.STATUS_DISCARDED)
 
 
 class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
