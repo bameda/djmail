@@ -14,6 +14,7 @@ class EmailBackend(base.BaseEmailBackend):
     Asynchronous email back-end that uses
     Celery task for sending emails.
     """
+
     def send_messages(self, email_messages):
         if len(email_messages) == 0:
             return 0

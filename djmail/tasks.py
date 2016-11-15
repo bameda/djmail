@@ -1,26 +1,28 @@
 # -*- encoding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-from celery.task import task
+from celery import Celery, shared_task
 
-from . import core
-from . import utils
+from . import core, utils
+
+app = Celery('djmail')
+
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 
-@task(name='tasks.send_messages')
+@shared_task
 def send_messages(messages):
     """
     Celery standard task for sending messages asynchronously.
     """
     return core._send_messages([
         utils.deserialize_email_message(m)
-        if isinstance(m, utils.string_types) else m
-        for m in messages
+        if isinstance(m, utils.string_types) else m for m in messages
     ])
 
 
-@task(name='tasks.retry_send_messages')
+@shared_task
 def retry_send_messages():
     """
     Celery periodic task retrying to send failed messages.
