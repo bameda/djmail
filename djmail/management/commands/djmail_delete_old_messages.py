@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
-from djmail import models
+from djmail.models import Message
 
 
 class Command(BaseCommand):
@@ -17,4 +17,4 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        models.Message.objects.filter(sent_at__lt=datetime.now() - timedelta(days=options['days']), status=models.STATUS_SENT).delete()
+        Message.objects.filter(sent_at__lt=datetime.now() - timedelta(days=options['days']), status=Message.STATUS_SENT).delete()

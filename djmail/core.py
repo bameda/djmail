@@ -11,9 +11,10 @@ from django.conf import settings
 from django.core.mail import get_connection
 from django.core.paginator import Paginator
 from django.utils import timezone
-StringIO = io.BytesIO if sys.version_info[0] == 2 else io.StringIO
 
-from . import models
+from .models import PRIORITY_LOW, Message
+
+StringIO = io.BytesIO if sys.version_info[0] == 2 else io.StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -50,10 +51,10 @@ def _safe_send_message(message_model, connection):
             logger.error(message_model.exception)
         else:
             if sended == 1:
-                message_model.status = models.STATUS_SENT
+                message_model.status = Message.STATUS_SENT
                 message_model.sent_at = timezone.now()
             else:
-                message_model.status = models.STATUS_FAILED
+                message_model.status = Message.STATUS_FAILED
                 message_model.retry_count += 1
 
         message_model.save()
@@ -62,8 +63,7 @@ def _safe_send_message(message_model, connection):
 
 def _get_real_backend():
     real_backend_path = getattr(
-        settings,
-        'DJMAIL_REAL_BACKEND',
+        settings, 'DJMAIL_REAL_BACKEND',
         'django.core.mail.backends.console.EmailBackend')
     return get_connection(backend=real_backend_path, fail_silently=False)
 
@@ -73,8 +73,10 @@ def _send_messages(email_messages):
 
     # Create a messages on a database for correct
     # tracking of their status.
-    email_models = [models.Message.from_email_message(email, save=True)
-                    for email in email_messages]
+    email_models = [
+        Message.from_email_message(
+            email, save=True) for email in email_messages
+    ]
 
     # Open connection for send all messages
     connection.open()
@@ -82,9 +84,9 @@ def _send_messages(email_messages):
         sended_counter = 0
         for email, model_instance in zip(email_messages, email_models):
             if hasattr(email, "priority"):
-                if email.priority <= models.PRIORITY_LOW:
+                if email.priority <= PRIORITY_LOW:
                     model_instance.priority = email.priority
-                    model_instance.status = models.STATUS_PENDING
+                    model_instance.status = Message.STATUS_PENDING
                     model_instance.save()
                     sended_counter += 1
                     continue
@@ -99,7 +101,7 @@ def _send_pending_messages():
     """
     Send pending, low priority messages.
     """
-    queryset = models.Message.objects.filter(status=models.STATUS_PENDING)\
+    queryset = Message.objects.filter(status=Message.STATUS_PENDING)\
                                      .order_by('-priority', 'created_at')
     connection = _get_real_backend()
     connection.open()
@@ -118,7 +120,7 @@ def _retry_send_messages():
     Retry to send failed messages.
     """
     max_retry_value = getattr(settings, 'DJMAIL_MAX_RETRY_NUMBER', 3)
-    queryset = models.Message.objects.filter(status=models.STATUS_FAILED)\
+    queryset = Message.objects.filter(status=Message.STATUS_FAILED)\
                                      .filter(retry_count__lte=max_retry_value)\
                                      .order_by('-priority', 'created_at')
 
@@ -139,6 +141,6 @@ def _mark_discarded_messages():
     limit and marks them as discarded.
     """
     max_retry_value = getattr(settings, 'DJMAIL_MAX_RETRY_NUMBER', 3)
-    queryset = models.Message.objects.filter(status=models.STATUS_FAILED,
-                                             retry_count__gt=max_retry_value)
-    return queryset.update(status=models.STATUS_DISCARDED)
+    queryset = Message.objects.filter(
+        status=Message.STATUS_FAILED, retry_count__gt=max_retry_value)
+    return queryset.update(status=Message.STATUS_DISCARDED)

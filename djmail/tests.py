@@ -6,26 +6,23 @@ import json
 import sys
 from datetime import datetime, timedelta
 
-
+from django.core import mail
 from django.core.mail import EmailMessage
 from django.core.management import call_command
-from django.core import mail
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.six import StringIO
 
-from . import core
-from . import models
-from . import utils
-from .template_mail import TemplateMail
-from .template_mail import MagicMailBuilder
-from .template_mail import make_email
+from . import core, utils
+from .models import Message
+from .template_mail import MagicMailBuilder, TemplateMail, make_email
 
 
 class EmailTestCaseMixin(object):
     def setUp(self):
-        models.Message.objects.all().delete()
-        self.email = EmailMessage('Hello', 'Body goes here', 'from@example.com',
+        Message.objects.all().delete()
+        self.email = EmailMessage('Hello', 'Body goes here',
+                                  'from@example.com',
                                   ['to1@example.com', 'to2@example.com'])
 
     def assertEmailEqual(self, a, b):
@@ -35,7 +32,6 @@ class EmailTestCaseMixin(object):
         self.assertEqual(dir(a), dir(b))
 
 
-
 class TestEmailSending(EmailTestCaseMixin, TestCase):
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
@@ -43,7 +39,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
     def test_simple_send_email(self):
         self.email.send()
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.async.EmailBackend',
@@ -56,7 +52,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         future.result()
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
@@ -66,8 +62,8 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
         self.assertEqual(number_sent_emails, 0)
         self.assertEqual(len(mail.outbox), 0)
-        self.assertEqual(models.Message.objects.count(), 1)
-        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
+        self.assertEqual(Message.objects.count(), 1)
+        self.assertEqual(Message.objects.get().status, Message.STATUS_FAILED)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.async.EmailBackend',
@@ -77,8 +73,8 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         future.result()
 
         self.assertEqual(len(mail.outbox), 0)
-        self.assertEqual(models.Message.objects.count(), 1)
-        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
+        self.assertEqual(Message.objects.count(), 1)
+        self.assertEqual(Message.objects.get().status, Message.STATUS_FAILED)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
@@ -87,7 +83,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         result = self.email.send()
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
@@ -96,21 +92,21 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         result = self.email.send()
 
         self.assertEqual(len(mail.outbox), 0)
-        self.assertEqual(models.Message.objects.count(), 1)
-        self.assertEqual(models.Message.objects.get().status, models.STATUS_FAILED)
+        self.assertEqual(Message.objects.count(), 1)
+        self.assertEqual(Message.objects.get().status, Message.STATUS_FAILED)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
         DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_retry_send_01(self):
-        message_model = models.Message.from_email_message(self.email)
-        message_model.status = models.STATUS_FAILED
+        message_model = Message.from_email_message(self.email)
+        message_model.status = Message.STATUS_FAILED
         message_model.retry_count = 1
         message_model.save()
 
         core._retry_send_messages()
 
-        message_model_2 = models.Message.objects.get(pk=message_model.pk)
+        message_model_2 = Message.objects.get(pk=message_model.pk)
         self.assertEqual(message_model_2.retry_count, 2)
 
     @override_settings(
@@ -118,16 +114,16 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend',
         DJMAIL_MAX_RETRY_NUMBER=2)
     def test_failing_retry_send_02(self):
-        message_model = models.Message.from_email_message(self.email)
-        message_model.status = models.STATUS_FAILED
+        message_model = Message.from_email_message(self.email)
+        message_model.status = Message.STATUS_FAILED
         message_model.retry_count = 3
         message_model.save()
 
         core._mark_discarded_messages()
 
-        message_model_2 = models.Message.objects.get(pk=message_model.pk)
+        message_model_2 = Message.objects.get(pk=message_model.pk)
         self.assertEqual(message_model_2.retry_count, 3)
-        self.assertEqual(message_model_2.status, models.STATUS_DISCARDED)
+        self.assertEqual(message_model_2.status, Message.STATUS_DISCARDED)
 
 
 class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
@@ -142,7 +138,7 @@ class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
         email.send('to@example.com', {'name': 'foo'})
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
         m = mail.outbox[0]
         self.assertEqual(m.subject, u'Subject1: foo')
@@ -159,7 +155,7 @@ class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
         email.send('to@example.com', {'name': 'foo'})
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
         m = mail.outbox[0]
         self.assertEqual(m.subject, u'Subject2: foo')
@@ -176,7 +172,7 @@ class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
         email.send()
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
         self.assertEqual(email.subject, u'Subject2: foo')
         self.assertEqual(email.body, u"body\n")
@@ -188,22 +184,20 @@ class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
     def test_simple_send_email_with_magic_builder_1_with_extra_kwargs(self):
         mails = MagicMailBuilder()
 
-        email = mails.test_email2("to@example.com",
-                                  {"name": "foo"},
-                                  from_email="no-reply@test.com")
+        email = mails.test_email2(
+            "to@example.com", {"name": "foo"}, from_email="no-reply@test.com")
         email.send()
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
         self.assertEqual(email.subject, 'Subject2: foo')
         self.assertEqual(email.body, 'body\n')
         self.assertEqual(email.alternatives, [(u'<b>Body</b>\n', 'text/html')])
 
     def test_simple_email_building(self):
-        email = make_email('test_email1',
-                           to='to@example.com',
-                           context={'name': 'foo'})
+        email = make_email(
+            'test_email1', to='to@example.com', context={'name': 'foo'})
 
         self.assertEqual(email.subject, 'Subject1: foo')
         self.assertEqual(email.body, '<b>Mail1: foo</b>\n')
@@ -211,17 +205,14 @@ class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
     def test_proper_handlign_different_uses_cases(self):
         from django.core import mail
 
-        email1 = make_email('test_email1',
-                            to='to@example.com',
-                            context={'name': 'foo'})
+        email1 = make_email(
+            'test_email1', to='to@example.com', context={'name': 'foo'})
 
-        email2 = make_email('test_email2',
-                            to='to@example.com',
-                            context={'name': 'foo'})
+        email2 = make_email(
+            'test_email2', to='to@example.com', context={'name': 'foo'})
 
-        email3 = make_email('test_email3',
-                            to='to@example.com',
-                            context={'name': 'foo'})
+        email3 = make_email(
+            'test_email3', to='to@example.com', context={'name': 'foo'})
 
         self.assertIsInstance(email1, mail.EmailMessage)
         self.assertEqual(email1.content_subtype, 'html')
@@ -237,23 +228,24 @@ class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
     def test_simple_send_email_with_magic_builder_1_with_low_priority(self):
         mails = MagicMailBuilder()
 
-        email = mails.test_email2('to@example.com', {'name': 'foo'}, priority=10)
+        email = mails.test_email2(
+            'to@example.com', {'name': 'foo'}, priority=10)
         email.send()
 
         self.assertEqual(len(mail.outbox), 0)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
-        m1 = models.Message.objects.get()
-        self.assertEqual(m1.status, models.STATUS_PENDING)
+        m1 = Message.objects.get()
+        self.assertEqual(m1.status, Message.STATUS_PENDING)
         self.assertEqual(m1.priority, 10)
 
         core._send_pending_messages()
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
-        m2 = models.Message.objects.get()
-        self.assertEqual(m2.status, models.STATUS_SENT)
+        m2 = Message.objects.get()
+        self.assertEqual(m2.status, Message.STATUS_SENT)
         self.assertEqual(m2.priority, 10)
 
 
@@ -279,7 +271,7 @@ class SerializationEmailTests(EmailTestCaseMixin, TestCase):
         email = mails.test_email2('to@example.com', {'name': 'foo'})
         email.send()
 
-        model = models.Message.objects.get()
+        model = Message.objects.get()
         self.assertEqual(email.from_email, model.from_email)
         self.assertEqual(email.to, model.to_email.split(','))
         self.assertEqual(email.subject, model.subject)
@@ -290,8 +282,8 @@ class CleanupManagementCommand(EmailTestCaseMixin, TestCase):
     def setUp(self):
         super(CleanupManagementCommand, self).setUp()
         # Create a message that was succesfully sent 1 year ago
-        self.old_log = models.Message.from_email_message(self.email)
-        self.old_log.status = models.STATUS_SENT
+        self.old_log = Message.from_email_message(self.email)
+        self.old_log.status = Message.STATUS_SENT
         self.old_log.sent_at = datetime.now() - timedelta(days=365)
         self.old_log.save()
 
@@ -300,19 +292,19 @@ class CleanupManagementCommand(EmailTestCaseMixin, TestCase):
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_delete_old_message_with_default_days(self):
         self.email.send()
-        self.assertEqual(models.Message.objects.count(), 2)
+        self.assertEqual(Message.objects.count(), 2)
         out = StringIO()
         sys.stout = out
         call_command('djmail_delete_old_messages', stdout=out)
-        self.assertEqual(models.Message.objects.count(), 1)
+        self.assertEqual(Message.objects.count(), 1)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_retain_old_message_with_specified_days(self):
         self.email.send()
-        self.assertEqual(models.Message.objects.count(), 2)
+        self.assertEqual(Message.objects.count(), 2)
         out = StringIO()
         sys.stout = out
         call_command('djmail_delete_old_messages', '--days', '366', stdout=out)
-        self.assertEqual(models.Message.objects.count(), 2)
+        self.assertEqual(Message.objects.count(), 2)

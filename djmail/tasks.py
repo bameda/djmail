@@ -1,19 +1,13 @@
 # -*- encoding: utf-8 -*-
 
 from __future__ import absolute_import, unicode_literals
-from celery import shared_task
 
-from . import core
-from . import utils
+from celery import Celery, shared_task
 
-from celery import Celery
+from . import core, utils
 
 app = Celery('djmail')
 
-# Using a string here means the worker don't have to serialize
-# the configuration object to child processes.
-# - namespace='CELERY' means all celery-related configuration keys
-#   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 
@@ -24,8 +18,7 @@ def send_messages(messages):
     """
     return core._send_messages([
         utils.deserialize_email_message(m)
-        if isinstance(m, utils.string_types) else m
-        for m in messages
+        if isinstance(m, utils.string_types) else m for m in messages
     ])
 
 
