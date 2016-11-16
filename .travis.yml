@@ -35,8 +35,6 @@ install:
 
 services:
   - postgresql
-  - redis
-
 
 script:
   - python manage.py test
