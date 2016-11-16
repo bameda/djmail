@@ -3,11 +3,16 @@
 from __future__ import unicode_literals
 
 import json
+import sys
+from datetime import datetime, timedelta
+
 
 from django.core.mail import EmailMessage
+from django.core.management import call_command
 from django.core import mail
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils.six import StringIO
 
 from . import core
 from . import models
@@ -28,6 +33,7 @@ class EmailTestCaseMixin(object):
         self.assertEqual(a.__class__, b.__class__)
         self.assertEqual(a.__dict__, b.__dict__)
         self.assertEqual(dir(a), dir(b))
+
 
 
 class TestEmailSending(EmailTestCaseMixin, TestCase):
@@ -54,7 +60,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_simple_send_email(self):
         number_sent_emails = self.email.send()
 
@@ -65,7 +71,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.async.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_async_send_email(self):
         future = self.email.send()
         future.result()
@@ -79,17 +85,15 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_async_send_email_with_celery(self):
         result = self.email.send()
-        result.wait()
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(models.Message.objects.count(), 1)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_async_send_email_with_celery(self):
         result = self.email.send()
-        result.wait()
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
@@ -97,7 +101,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_retry_send_01(self):
         message_model = models.Message.from_email_message(self.email)
         message_model.status = models.STATUS_FAILED
@@ -111,7 +115,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend',
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend',
         DJMAIL_MAX_RETRY_NUMBER=2)
     def test_failing_retry_send_02(self):
         message_model = models.Message.from_email_message(self.email)
@@ -280,3 +284,35 @@ class SerializationEmailTests(EmailTestCaseMixin, TestCase):
         self.assertEqual(email.to, model.to_email.split(','))
         self.assertEqual(email.subject, model.subject)
         self.assertEqual(email.body, model.body_text)
+
+
+class CleanupManagementCommand(EmailTestCaseMixin, TestCase):
+    def setUp(self):
+        super(CleanupManagementCommand, self).setUp()
+        # Create a message that was succesfully sent 1 year ago
+        self.old_log = models.Message.from_email_message(self.email)
+        self.old_log.status = models.STATUS_SENT
+        self.old_log.sent_at = datetime.now() - timedelta(days=365)
+        self.old_log.save()
+
+    @override_settings(
+        EMAIL_BACKEND='djmail.backends.default.EmailBackend',
+        DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_delete_old_message_with_default_days(self):
+        self.email.send()
+        self.assertEqual(models.Message.objects.count(), 2)
+        out = StringIO()
+        sys.stout = out
+        call_command('djmail_delete_old_messages', stdout=out)
+        self.assertEqual(models.Message.objects.count(), 1)
+
+    @override_settings(
+        EMAIL_BACKEND='djmail.backends.default.EmailBackend',
+        DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_retain_old_message_with_specified_days(self):
+        self.email.send()
+        self.assertEqual(models.Message.objects.count(), 2)
+        out = StringIO()
+        sys.stout = out
+        call_command('djmail_delete_old_messages', '--days', '366', stdout=out)
+        self.assertEqual(models.Message.objects.count(), 2)

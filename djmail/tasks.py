@@ -1,14 +1,23 @@
 # -*- encoding: utf-8 -*-
 
-from __future__ import unicode_literals
-
-from celery.task import task
+from __future__ import absolute_import, unicode_literals
+from celery import shared_task
 
 from . import core
 from . import utils
 
+from celery import Celery
 
-@task(name='tasks.send_messages')
+app = Celery('djmail')
+
+# Using a string here means the worker don't have to serialize
+# the configuration object to child processes.
+# - namespace='CELERY' means all celery-related configuration keys
+#   should have a `CELERY_` prefix.
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+
+@shared_task
 def send_messages(messages):
     """
     Celery standard task for sending messages asynchronously.
@@ -20,7 +29,7 @@ def send_messages(messages):
     ])
 
 
-@task(name='tasks.retry_send_messages')
+@shared_task
 def retry_send_messages():
     """
     Celery periodic task retrying to send failed messages.
