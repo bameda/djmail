@@ -30,6 +30,7 @@ class EmailTestCaseMixin(object):
         self.assertEqual(dir(a), dir(b))
 
 
+
 class TestEmailSending(EmailTestCaseMixin, TestCase):
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
@@ -54,7 +55,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.default.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_simple_send_email(self):
         number_sent_emails = self.email.send()
 
@@ -65,7 +66,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.async.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_async_send_email(self):
         future = self.email.send()
         future.result()
@@ -79,17 +80,15 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
         DJMAIL_REAL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_async_send_email_with_celery(self):
         result = self.email.send()
-        result.wait()
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(models.Message.objects.count(), 1)
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_async_send_email_with_celery(self):
         result = self.email.send()
-        result.wait()
 
         self.assertEqual(len(mail.outbox), 0)
         self.assertEqual(models.Message.objects.count(), 1)
@@ -97,7 +96,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend')
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend')
     def test_failing_retry_send_01(self):
         message_model = models.Message.from_email_message(self.email)
         message_model.status = models.STATUS_FAILED
@@ -111,7 +110,7 @@ class TestEmailSending(EmailTestCaseMixin, TestCase):
 
     @override_settings(
         EMAIL_BACKEND='djmail.backends.celery.EmailBackend',
-        DJMAIL_REAL_BACKEND='testing.mocks.BrokenEmailBackend',
+        DJMAIL_REAL_BACKEND='djmail.mocks.BrokenEmailBackend',
         DJMAIL_MAX_RETRY_NUMBER=2)
     def test_failing_retry_send_02(self):
         message_model = models.Message.from_email_message(self.email)
