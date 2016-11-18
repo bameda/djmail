@@ -12,7 +12,7 @@ from django.core.mail import get_connection
 from django.core.paginator import Paginator
 from django.utils import timezone
 
-from .models import PRIORITY_LOW, Message
+from .models import Message
 
 StringIO = io.BytesIO if sys.version_info[0] == 2 else io.StringIO
 
@@ -84,7 +84,7 @@ def _send_messages(email_messages):
         sended_counter = 0
         for email, model_instance in zip(email_messages, email_models):
             if hasattr(email, "priority"):
-                if email.priority <= PRIORITY_LOW:
+                if email.priority <= Message.PRIORITY_LOW:
                     model_instance.priority = email.priority
                     model_instance.status = Message.STATUS_PENDING
                     model_instance.save()

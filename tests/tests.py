@@ -13,9 +13,9 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.six import StringIO
 
-from . import core, utils
-from .models import Message
-from .template_mail import MagicMailBuilder, TemplateMail, make_email
+from djmail import core, utils
+from djmail.models import Message
+from djmail.template_mail import MagicMailBuilder, TemplateMail, make_email
 
 
 class EmailTestCaseMixin(object):

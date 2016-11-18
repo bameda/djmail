@@ -12,7 +12,7 @@ from django.utils import translation
 
 from . import exceptions as exc
 from . import utils
-from .models import PRIORITY_STANDARD
+from .models import Message
 
 log = logging.getLogger(__name__)
 
@@ -149,7 +149,7 @@ class MagicMailBuilder(object):
     def __getattr__(self, name):
         def _dynamic_email_generator(to,
                                      context,
-                                     priority=PRIORITY_STANDARD,
+                                     priority=Message.PRIORITY_STANDARD,
                                      **kwargs):
             lang = None
 

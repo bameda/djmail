@@ -6,8 +6,7 @@ from django.db import models
 
 from . import utils
 
-PRIORITY_LOW = 20
-PRIORITY_STANDARD = 50
+
 
 
 class Message(models.Model):
@@ -21,6 +20,12 @@ class Message(models.Model):
         (STATUS_SENT, 'Sent'),
         (STATUS_FAILED, 'Failed'),
         (STATUS_DISCARDED, 'Discarded'), )
+    PRIORITY_LOW = 20
+    PRIORITY_STANDARD = 50
+    PRIORITY_CHOICES = (
+        (PRIORITY_LOW, 'Low'),
+        (PRIORITY_STANDARD, 'Standard'),
+    )
 
     uuid = models.CharField(max_length=40, primary_key=True)
 
@@ -34,7 +39,7 @@ class Message(models.Model):
 
     retry_count = models.SmallIntegerField(default=-1)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
-    priority = models.SmallIntegerField(default=PRIORITY_STANDARD)
+    priority = models.SmallIntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_STANDARD)
 
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, default=None)
@@ -52,8 +57,7 @@ class Message(models.Model):
 
         kwargs = {
             "from_email": utils.force_text(email_message.from_email),
-            "to_email":
-            ",".join(utils.force_text(x) for x in email_message.to),
+            "to_email": ",".join(utils.force_text(x) for x in email_message.to),
             "subject": utils.force_text(email_message.subject),
             "data": utils.serialize_email_message(email_message),
             get_body_key(email_message.content_subtype):
@@ -72,6 +76,6 @@ class Message(models.Model):
         return instance
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ['-created_at']
         verbose_name = 'Message'
         verbose_name_plural = 'Messages'
