@@ -6,5 +6,5 @@ class DjMailConfig(AppConfig):
     verbose_name = "DjMail"
 
     def ready(self):
-        from .signals import generate_uuid
+        from . import signals
         super(DjMailConfig, self).ready()

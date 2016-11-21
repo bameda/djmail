@@ -7,8 +7,6 @@ from django.db import models
 from . import utils
 
 
-
-
 class Message(models.Model):
     STATUS_DRAFT = 10
     STATUS_PENDING = 20
@@ -52,8 +50,7 @@ class Message(models.Model):
     def from_email_message(cls, email_message, save=False):
         def get_body_key(body_type):
             """Declare HTML body subtype as text/html else as text/plain."""
-            return 'body_{}'.format('html' if body_type.split('/')[-1] ==
-                                    'html' else 'text')
+            return 'body_{}'.format('html' if body_type.split('/')[-1] == 'html' else 'text')
 
         kwargs = {
             "from_email": utils.force_text(email_message.from_email),
@@ -65,8 +62,7 @@ class Message(models.Model):
         }
 
         # Update the body (if missing) from the alternatives
-        for alt_body, alt_type in getattr(email_message, 'alternatives',
-                                          None) or []:
+        for alt_body, alt_type in getattr(email_message, 'alternatives', None) or []:
             kwargs.setdefault(get_body_key(alt_type), alt_body)
 
         instance = cls(**kwargs)

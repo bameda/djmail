@@ -18,13 +18,11 @@ log = logging.getLogger(__name__)
 
 
 def _get_body_template_prototype():
-    return getattr(settings, 'DJMAIL_BODY_TEMPLATE_PROTOTYPE',
-                   'emails/{name}-body-{type}.{ext}')
+    return getattr(settings, 'DJMAIL_BODY_TEMPLATE_PROTOTYPE', 'emails/{name}-body-{type}.{ext}')
 
 
 def _get_subject_template_prototype():
-    return getattr(settings, 'DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE',
-                   'emails/{name}-subject.{ext}')
+    return getattr(settings, 'DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE', 'emails/{name}-subject.{ext}')
 
 
 def _get_template_extension():
@@ -147,10 +145,7 @@ class MagicMailBuilder(object):
         self._template_mail_cls = template_mail_cls
 
     def __getattr__(self, name):
-        def _dynamic_email_generator(to,
-                                     context,
-                                     priority=Message.PRIORITY_STANDARD,
-                                     **kwargs):
+        def _dynamic_email_generator(to, context, priority=Message.PRIORITY_STANDARD, **kwargs):
             lang = None
 
             if not isinstance(to, utils.string_types):
@@ -166,19 +161,14 @@ class MagicMailBuilder(object):
                 context['lang'] = lang
 
             template_email = self._template_mail_cls(name=name)
-            email_instance = template_email.make_email_object(to, context, **
-                                                              kwargs)
+            email_instance = template_email.make_email_object(to, context, **kwargs)
             email_instance.priority = priority
             return email_instance
 
         return _dynamic_email_generator
 
 
-def make_email(name,
-               to,
-               context=None,
-               template_mail_cls=TemplateMail,
-               **kwargs):
+def make_email(name, to, context=None, template_mail_cls=TemplateMail, **kwargs):
     """
     Helper for build email objects.
     """

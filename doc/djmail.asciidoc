@@ -37,6 +37,7 @@ The simplest way to get djmail for your project, is installing it using *pip*:
 pip install djmail
 ----
 
+
 User guide
 ----------
 
@@ -48,26 +49,30 @@ As I have mentioned previously, _djmail_ works as a middleware.
 - Handles priority, with ability to delay sending of messages with lowest priorty 
   to periodic task (with cron or celery).
 
-To get djmail working on your project, you should configure it:
+To get djmail working on your project, you should configure it. An example setup:
 
-.Example initial development configuration:
+.Add it to the `INSTALLED_APPS` your Django settings:
+
+[source,python]
+----
+INSTALLED_APPS = [
+  ...,
+  'djmail',
+  ...,
+]
+----
+
+.Set the email backends in the settings.
+
 [source,python]
 ----
 EMAIL_BACKEND="djmail.backends.default.EmailBackend"
 DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
-INSTALLED_APPS += ('djmail',)
 ----
 
-This specifies: emails are managed by djmail default backend and sent using
+This specifies: emails are managed by djmail default backend and actually sent using
 console based django builtin backend.
 
-If your project is using South consider to include the following line in your settings file:
-
-----
-SOUTH_MIGRATION_MODULES = {
-    'djmail': 'djmail.south_migrations',
-}
-----
 
 How to use?
 ~~~~~~~~~~~
@@ -87,6 +92,24 @@ _djmail_ comes with three backends:
   send emails asynchronously using `concurrent.futures`.
 - *djmail.backends.celery.EmailBackend* +
   send emails asynchronously using celery tasks.
+
+
+Management Commands
+~~~~~~~~~~~~~~~~~~
+
+_djmail_ has two built-in management commands:
+
+- *djmail_retry_send_messages* +
+  Sends all mail in the queue, also retrying previously failed email messages. After the global retry limit is reached, an email is marked as discarded.
+- *djmail_delete_old_messages --days=183* +
+  _djmail_ stores all messages in the database, which could eventually take up a lot of database space for data which is not important to keep. This command deletes all succesfully sent messages older than the provided age (when the `--days` parameter is ommited, the default value is 6 months).
+
+An example setup using cronjobs (`sudo crontab -e`) would be
+
+----
+@hourly python manage.py djmail_retry_send_messages
+@weekly python manage.py djmail_delete_old_messages --days=31
+----
 
 
 Template Emails

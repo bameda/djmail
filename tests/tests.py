@@ -21,9 +21,7 @@ from djmail.template_mail import MagicMailBuilder, TemplateMail, make_email
 class EmailTestCaseMixin(object):
     def setUp(self):
         Message.objects.all().delete()
-        self.email = EmailMessage('Hello', 'Body goes here',
-                                  'from@example.com',
-                                  ['to1@example.com', 'to2@example.com'])
+        self.email = EmailMessage('Hello', 'Body goes here', 'from@example.com', ['to1@example.com', 'to2@example.com'])
 
     def assertEmailEqual(self, a, b):
         # Can't do simple equality comparison... That sucks!

@@ -19,6 +19,7 @@ def _close_connection_on_finish(function):
     Decorator for future task, that closes
     Django database connection when it ends.
     """
+
     @functools.wraps(function)
     def _decorator(*args, **kwargs):
         try:
@@ -34,6 +35,7 @@ class EmailBackend(base.BaseEmailBackend):
     Asynchronous email back-end that uses a
     thread pool for sending emails.
     """
+
     def send_messages(self, email_messages):
         if len(email_messages) == 0:
             future = Future()
