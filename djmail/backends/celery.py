@@ -19,6 +19,6 @@ class EmailBackend(base.BaseEmailBackend):
         if len(email_messages) == 0:
             return 0
 
-        if settings.CELERY_TASK_SERIALIZER in ('json', ):
+        if getattr(settings, 'CELERY_TASK_SERIALIZER', 'json') in ('json', ):
             email_messages = [utils.serialize_email_message(e) for e in email_messages]
         return tasks.send_messages.delay(email_messages)
