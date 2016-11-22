@@ -44,6 +44,6 @@ class EmailBackend(base.BaseEmailBackend):
 
         @_close_connection_on_finish
         def _send(messages):
-            return core._send_messages(email_messages)
+            return core._send_messages(messages)
 
         return executor.submit(_send, email_messages)
