@@ -1,7 +1,7 @@
 djmail documentation
 ====================
 David Barragan, <bameda@dbarragan.com>
-0.13.1, 2016-11-14
+1.0.0, 2016-11-29
 
 :toc:
 :numbered:
@@ -46,7 +46,7 @@ As I have mentioned previously, _djmail_ works as a middleware.
 - It saves emails using django orm and track its status. If an exception is raised during sending,
   it marks the email as *failed* and stores the exception traceback for posterior analysis.
 - Exposes usefull commands and methods for retring to send failed messages.
-- Handles priority, with ability to delay sending of messages with lowest priorty 
+- Handles priority, with ability to delay sending of messages with lowest priorty
   to periodic task (with cron or celery).
 
 To get djmail working on your project, you should configure it. An example setup:
@@ -230,7 +230,7 @@ License
 [source,text]
 ----
 Copyright (c) 2013-2015 Andrey Antukh <niwi@niwi.nz>
-Copyright (c) 2015 David Barragan <bameda@dbarragan.com>
+Copyright (c) 2015-2016 David Barragan <bameda@dbarragan.com>
 
 All rights reserved.
 

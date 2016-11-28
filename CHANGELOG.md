@@ -1,6 +1,17 @@
 # Changelog #
 
 
+## 1.0.0 (2016-11-29)
+
+- Now Djmail is compatible only with Django >= 1.8.
+- Use celery >= 4.x and remove djcelery dependency.
+- Add management command 'djmail_delete_old_messages'.
+- Fix Issue #36 'Celery backend fails when CELERY_TASK_SERIALIZER not defined'.
+- Minor style improvements and code reorganization.
+
+Note: Special thanks to @mathieuhinderyckx for makeing tjis release posible.
+
+
 ## 0.13.1 (2016-11-14)
 
 - Fix management command 'djmail_retry_send_messages',
