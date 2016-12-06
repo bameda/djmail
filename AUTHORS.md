@@ -15,6 +15,6 @@ generally made djmail that much better:
 - David Fischer <david.fischer.ch@gmail.com>
 - Jesús Espino <jespinog@gmail.com>
 - Kirill Klenov <horneds@gmail.com>
-- Mathieu Hinderyckx
+- Mathieu Hinderyckx <mathieu.hinderyckx@gmail.com>
 - Mauricio de Abreu Antunes <mauricio.abreua@gmail.com>
 

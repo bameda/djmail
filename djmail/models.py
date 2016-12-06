@@ -2,31 +2,27 @@
 
 from __future__ import unicode_literals
 
-import uuid
-
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 
 from . import utils
 
 
-STATUS_DRAFT = 10
-STATUS_PENDING = 20
-STATUS_SENT = 30
-STATUS_FAILED = 40
-STATUS_DISCARDED = 50
-
-PRIORITY_LOW = 20
-PRIORITY_STANDARD = 50
-
-
 class Message(models.Model):
+    STATUS_DRAFT = 10
+    STATUS_PENDING = 20
+    STATUS_SENT = 30
+    STATUS_FAILED = 40
+    STATUS_DISCARDED = 50
     STATUS_CHOICES = (
         (STATUS_DRAFT, 'Draft'),
         (STATUS_SENT, 'Sent'),
         (STATUS_FAILED, 'Failed'),
-        (STATUS_DISCARDED, 'Discarded'),
+        (STATUS_DISCARDED, 'Discarded'), )
+    PRIORITY_LOW = 20
+    PRIORITY_STANDARD = 50
+    PRIORITY_CHOICES = (
+        (PRIORITY_LOW, 'Low'),
+        (PRIORITY_STANDARD, 'Standard'),
     )
 
     uuid = models.CharField(max_length=40, primary_key=True)
@@ -41,7 +37,7 @@ class Message(models.Model):
 
     retry_count = models.SmallIntegerField(default=-1)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
-    priority = models.SmallIntegerField(default=PRIORITY_STANDARD)
+    priority = models.SmallIntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_STANDARD)
 
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, default=None)
@@ -61,7 +57,8 @@ class Message(models.Model):
             "to_email": ",".join(utils.force_text(x) for x in email_message.to),
             "subject": utils.force_text(email_message.subject),
             "data": utils.serialize_email_message(email_message),
-            get_body_key(email_message.content_subtype): utils.force_text(email_message.body)
+            get_body_key(email_message.content_subtype):
+            utils.force_text(email_message.body)
         }
 
         # Update the body (if missing) from the alternatives
@@ -75,12 +72,6 @@ class Message(models.Model):
         return instance
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ['-created_at']
         verbose_name = 'Message'
         verbose_name_plural = 'Messages'
-
-
-@receiver(pre_save, sender=Message, dispatch_uid='message_uuid_signal')
-def generate_uuid(sender, instance, **kwargs):
-    if not instance.uuid:
-        instance.uuid = str(uuid.uuid1())

@@ -7,24 +7,22 @@ from contextlib import contextmanager
 
 from django.conf import settings
 from django.core import mail
-from django.template import loader, TemplateDoesNotExist
+from django.template import TemplateDoesNotExist, loader
 from django.utils import translation
 
 from . import exceptions as exc
-from . import models
 from . import utils
+from .models import Message
 
 log = logging.getLogger(__name__)
 
 
 def _get_body_template_prototype():
-    return getattr(settings, 'DJMAIL_BODY_TEMPLATE_PROTOTYPE',
-                   'emails/{name}-body-{type}.{ext}')
+    return getattr(settings, 'DJMAIL_BODY_TEMPLATE_PROTOTYPE', 'emails/{name}-body-{type}.{ext}')
 
 
 def _get_subject_template_prototype():
-    return getattr(settings, 'DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE',
-                   'emails/{name}-subject.{ext}')
+    return getattr(settings, 'DJMAIL_SUBJECT_TEMPLATE_PROTOTYPE', 'emails/{name}-subject.{ext}')
 
 
 def _get_template_extension():
@@ -56,8 +54,10 @@ class TemplateMail(object):
 
     def _render_message_body_as_html(self, context):
         template_ext = _get_template_extension()
-        template_name = self._body_template_name.format(**{
-            'ext': template_ext, 'name': self.name, 'type': 'html'})
+        template_name = self._body_template_name.format(
+            **{'ext': template_ext,
+               'name': self.name,
+               'type': 'html'})
 
         try:
             return loader.render_to_string(template_name, context)
@@ -78,7 +78,8 @@ class TemplateMail(object):
         try:
             subject = loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
-            raise exc.TemplateNotFound("Template '{0}' does not exists.".format(e))
+            raise exc.TemplateNotFound(
+                "Template '{0}' does not exists.".format(e))
         return ' '.join(subject.strip().split())
 
     def make_email_object(self, to, context, **kwargs):
@@ -92,7 +93,8 @@ class TemplateMail(object):
             body_txt = self._render_message_body_as_txt(context)
 
         if not body_txt and not body_html:
-            raise exc.TemplateNotFound("Body of email message shouldn't be empty")
+            raise exc.TemplateNotFound(
+                "Body of email message shouldn't be empty")
 
         if body_txt and body_html:
             email = mail.EmailMultiAlternatives(**kwargs)
@@ -124,7 +126,8 @@ class InlineCSSMixin(object):
         Transform CSS into in-line style attributes.
         """
         import premailer
-        html = super(InlineCSSMixin, self)._render_message_body_as_html(context)
+        html = super(InlineCSSMixin,
+                     self)._render_message_body_as_html(context)
         return premailer.transform(html) if html else html
 
 
@@ -133,21 +136,23 @@ class InlineCSSTemplateMail(InlineCSSMixin, TemplateMail):
 
 
 class MagicMailBuilder(object):
-    def __init__(self, email_attr='email', lang_attr='lang',
+    def __init__(self,
+                 email_attr='email',
+                 lang_attr='lang',
                  template_mail_cls=TemplateMail):
         self._email_attr = email_attr
         self._lang_attr = lang_attr
         self._template_mail_cls = template_mail_cls
 
     def __getattr__(self, name):
-        def _dynamic_email_generator(to, context, priority=models.PRIORITY_STANDARD, **kwargs):
+        def _dynamic_email_generator(to, context, priority=Message.PRIORITY_STANDARD, **kwargs):
             lang = None
 
             if not isinstance(to, utils.string_types):
                 if not hasattr(to, self._email_attr):
                     raise AttributeError(
-                        "to' parameter does not have '{0._email_attr}' attribute".format(
-                        self))
+                        "to' parameter does not have '{0._email_attr}' attribute".
+                        format(self))
 
                 lang = getattr(to, self._lang_attr, None)
                 to = getattr(to, self._email_attr)
