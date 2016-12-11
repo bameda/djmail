@@ -52,25 +52,25 @@ class TemplateMail(object):
         self._body_template_name = _get_body_template_prototype()
         self._subject_template_name = _get_subject_template_prototype()
 
-    def _render_message_body_as_html(self, context):
-        template_ext = _get_template_extension()
-        template_name = self._body_template_name.format(
-            **{'ext': template_ext,
+    def _get_template_name(self, t):
+        return self._body_template_name.format(
+            **{'ext': _get_template_extension(),
                'name': self.name,
-               'type': 'html'})
+               'type': t})
+
+    def _render_message_body(self, context, t):
+        template_name = self._get_template_name(t)
 
         try:
             return loader.render_to_string(template_name, context)
         except TemplateDoesNotExist as e:
             log.warning("Template '{0}' does not exists.".format(e))
+
+    def _render_message_body_as_html(self, context):
+        return self._render_message_body(context, 'html')
 
     def _render_message_body_as_txt(self, context):
-        template_name = self._body_template_name.format(
-            ext=_get_template_extension(), name=self.name, type='text')
-        try:
-            return loader.render_to_string(template_name, context)
-        except TemplateDoesNotExist as e:
-            log.warning("Template '{0}' does not exists.".format(e))
+        return self._render_message_body(context, 'text')
 
     def _render_message_subject(self, context):
         template_name = self._subject_template_name.format(
@@ -94,7 +94,9 @@ class TemplateMail(object):
 
         if not body_txt and not body_html:
             raise exc.TemplateNotFound(
-                "Body of email message shouldn't be empty")
+                "Body of email message shouldn't be empty. "
+                "Update '{text}' or '{html}'".format(html=self._get_template_name('html'),
+                                                     text=self._get_template_name('text')))
 
         if body_txt and body_html:
             email = mail.EmailMultiAlternatives(**kwargs)
@@ -121,6 +123,7 @@ class TemplateMail(object):
 
 
 class InlineCSSMixin(object):
+
     def _render_message_body_as_html(self, context):
         """
         Transform CSS into in-line style attributes.
@@ -136,6 +139,7 @@ class InlineCSSTemplateMail(InlineCSSMixin, TemplateMail):
 
 
 class MagicMailBuilder(object):
+
     def __init__(self,
                  email_attr='email',
                  lang_attr='lang',
