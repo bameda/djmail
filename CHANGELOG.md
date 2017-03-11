@@ -1,6 +1,13 @@
 # Changelog #
 
 
+## 1.0.1 (2017-03-11)
+
+- Fix some minor PEP8 errors.
+- Add template names to exception about empty body, to be able to simply update them.
+- Remove duplication of code in _render_message_body_as_html and _render_message_body_as_text.
+
+
 ## 1.0.0 (2016-11-29)
 
 - Now Djmail is compatible only with Django >= 1.8.
