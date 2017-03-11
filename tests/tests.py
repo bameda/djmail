@@ -13,7 +13,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.six import StringIO
 
-from djmail import core, utils
+from djmail import core, utils, exceptions
 from djmail.models import Message
 from djmail.template_mail import MagicMailBuilder, TemplateMail, make_email
 
@@ -245,6 +245,12 @@ class TestTemplateEmailSending(EmailTestCaseMixin, TestCase):
         m2 = Message.objects.get()
         self.assertEqual(m2.status, Message.STATUS_SENT)
         self.assertEqual(m2.priority, 10)
+
+    def test_error_when_there_is_no_email_body_templates(self):
+        with self.assertRaises(exceptions.TemplateNotFound):
+            email = make_email(
+                'test_email_error_with_no_body', to='to@example.com', context={'name': 'foo'})
+
 
 
 class SerializationEmailTests(EmailTestCaseMixin, TestCase):
