@@ -68,6 +68,7 @@ INSTALLED_APPS = [
 ----
 EMAIL_BACKEND="djmail.backends.default.EmailBackend"
 DJMAIL_REAL_BACKEND="django.core.mail.backends.console.EmailBackend"
+INSTALLED_APPS += ('djmail',)
 ----
 
 This specifies: emails are managed by djmail default backend and actually sent using
