@@ -4,7 +4,7 @@
 ## 1.0.2 (2018-06-06)
 
 - Fix minor error with async backend.
-- Runs with Django 1.11 and Python 3.6.
+- Runs with Django 1.11 and Django 2 and Python 3.6.
 
 
 ## 1.0.1 (2017-03-11)
