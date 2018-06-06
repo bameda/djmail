@@ -1,10 +1,11 @@
 # Changelog #
 
 
-## 1.0.2 (2018-06-06)
+## 1.1.0 (2018-06-06)
 
 - Fix minor error with async backend.
-- Runs with Django 1.11 and Django 2 and Python 3.6.
+- Now djmail is compatible with Django 1.11, Django 2 and Python 3.6.
+- Remove compatibility with python 3.3.
 
 
 ## 1.0.1 (2017-03-11)
