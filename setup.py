@@ -4,6 +4,9 @@ description = """
 Simple, powerful and non-obstructive django email middleware.
 """
 
+with open("README.rst", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name='djmail',
     url='https://github.com/bameda/djmail',
@@ -15,6 +18,8 @@ setup(
     version='1.1.0',
     packages=find_packages(exclude=['contrib', 'docs', 'test*']),
     description=description.strip(),
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
     zip_safe=False,
     include_package_data=True,
     package_data={
@@ -32,10 +37,9 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries',
         'Topic :: Utilities',
     ]
