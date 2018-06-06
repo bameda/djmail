@@ -6,6 +6,7 @@
 - Fix minor error with async backend.
 - Now djmail is compatible with Django 1.11, Django 2 and Python 3.6.
 - Remove compatibility with python 3.3.
+- Show email html body in the admin panel (PR #45 thanks to @jdruiter).
 
 
 ## 1.0.1 (2017-03-11)
