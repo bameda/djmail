@@ -50,7 +50,7 @@ def _safe_send_message(message_model, connection):
             message_model.exception = f.read()
             logger.error(message_model.exception)
         else:
-            if sended == 1:
+            if sended:
                 message_model.status = Message.STATUS_SENT
                 message_model.sent_at = timezone.now()
             else:
@@ -58,7 +58,9 @@ def _safe_send_message(message_model, connection):
                 message_model.retry_count += 1
 
         message_model.save()
-        return sended
+
+        # Celery backend renturn an AsyncResult object
+        return 1 if sended else 0
 
 
 def _get_real_backend():
@@ -102,7 +104,7 @@ def _send_pending_messages():
     Send pending, low priority messages.
     """
     queryset = Message.objects.filter(status=Message.STATUS_PENDING)\
-                                     .order_by('-priority', 'created_at')
+                              .order_by('-priority', 'created_at')
     connection = _get_real_backend()
     connection.open()
     try:
@@ -121,8 +123,8 @@ def _retry_send_messages():
     """
     max_retry_value = getattr(settings, 'DJMAIL_MAX_RETRY_NUMBER', 3)
     queryset = Message.objects.filter(status=Message.STATUS_FAILED)\
-                                     .filter(retry_count__lte=max_retry_value)\
-                                     .order_by('-priority', 'created_at')
+                              .filter(retry_count__lte=max_retry_value)\
+                              .order_by('-priority', 'created_at')
 
     connection = _get_real_backend()
     connection.open()
