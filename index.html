@@ -76,7 +76,8 @@ Works transparently (works as middleware for native django email backends)
 <h3 id="_how_to_install">2.1. How to install?</h3>
 <div class="paragraph"><p>The simplest way to get djmail for your project, is installing it using <strong>pip</strong>:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span>pip install djmail
+</pre></div></div></div>
 </div>
 </div>
 </div>
@@ -106,10 +107,17 @@ Handles priority, with ability to delay sending of messages with lowest priorty
 <div class="paragraph"><p>To get djmail working on your project, you should configure it. An example setup:</p></div>
 <div class="listingblock">
 <div class="title">Add it to the <span class="monospaced">INSTALLED_APPS</span> your Django settings:</div>
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="o">...</span><span class="p">,</span>
+  <span class="s1">&#39;djmail&#39;</span><span class="p">,</span>
+  <span class="o">...</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div></div></div>
 <div class="listingblock">
 <div class="title">Set the email backends in the settings.</div>
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span><span class="n">EMAIL_BACKEND</span><span class="o">=</span><span class="s2">&quot;djmail.backends.default.EmailBackend&quot;</span>
+<span class="n">DJMAIL_REAL_BACKEND</span><span class="o">=</span><span class="s2">&quot;django.core.mail.backends.console.EmailBackend&quot;</span>
+</pre></div></div></div>
 <div class="paragraph"><p>This specifies: emails are managed by djmail default backend and actually sent using
 console based django builtin backend.</p></div>
 <div class="sect2">
@@ -188,10 +196,27 @@ emails the way you did before.</p></div>
 <div class="paragraph"><p>This is a low level interface for buiding emails using templates. It allows to statically define email classes for posterior
 usage:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">djmail</span> <span class="kn">import</span> <span class="n">template_mail</span>
+<span class="c1"># Define a subclass of TemplateMail</span>
+<span class="k">class</span> <span class="nc">SomeTemplateEmail</span><span class="p">(</span><span class="n">template_mail</span><span class="o">.</span><span class="n">TemplateMail</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;some_email&quot;</span>
+
+<span class="c1"># Create a instance</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">SomeTemplateEmail</span><span class="p">()</span>
+
+<span class="c1"># Buld and sent message with specified context</span>
+<span class="n">email</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;to@example.com&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="s2">&quot;context&quot;</span><span class="p">})</span>
+</pre></div></div></div>
 <div class="paragraph"><p>Also you can obtain a native django email instance from TemplateMail instance:</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span><span class="c1"># Create a instance</span>
+<span class="n">template_email</span> <span class="o">=</span> <span class="n">SomeTemplateEmail</span><span class="p">()</span>
+
+<span class="c1"># obtain a native django email object</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">template_email</span><span class="o">.</span><span class="n">make_email_object</span><span class="p">(</span><span class="s2">&quot;to@example.com&quot;</span><span class="p">,</span>
+                                         <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="s2">&quot;context&quot;</span><span class="p">})</span>
+<span class="n">email</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+</pre></div></div></div>
 <div class="paragraph"><p><span class="monospaced">TemplateMail</span> default implementation searches these templates:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -225,11 +250,26 @@ usage:</p></div>
 <span class="monospaced">TemplateMail</span> implementation but exposes a dynamic api that allows building of subclasses on demand.</p></div>
 <div class="listingblock">
 <div class="title">Example that represents the same behavior as previous example using dynamic api of <span class="monospaced">MagicMailBuilder</span></div>
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">djmail</span> <span class="kn">import</span> <span class="n">template_mail</span>
+<span class="c1"># Create MagicMailBuilder instance</span>
+<span class="n">mails</span> <span class="o">=</span> <span class="n">template_mail</span><span class="o">.</span><span class="n">MagicMailBuilder</span><span class="p">()</span>
+
+<span class="c1"># Create a native email object.</span>
+<span class="c1"># NOTE: The method name represents a email name.</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">mails</span><span class="o">.</span><span class="n">some_email</span><span class="p">(</span><span class="s2">&quot;to@example.com&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="s2">&quot;context&quot;</span><span class="p">})</span>
+<span class="n">email</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+</pre></div></div></div>
 <div class="paragraph"><p>Additionally, instead of receiver email address you can pass a django model
 instance that represents a user (it should have "email" field for work):</p></div>
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyUser</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">lang</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;es&quot;</span><span class="p">)</span>
+    <span class="c1"># [...]</span>
+
+<span class="n">user</span> <span class="o">=</span> <span class="n">MyUser</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">mails</span><span class="o">.</span><span class="n">some_email</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;template&quot;</span><span class="p">:</span> <span class="s2">&quot;context&quot;</span><span class="p">})</span>
+</pre></div></div></div>
 <div class="paragraph"><p>Magic builder is really magic, and if your user class has lang field, magic builder uses it to setup a correct user language
 for rendering email in user locale.</p></div>
 <div class="admonitionblock">
@@ -290,7 +330,33 @@ for rendering email in user locale.</p></div>
 <h2 id="license">6. License</h2>
 <div class="sectionbody">
 <div class="listingblock">
-<div class="content"></div></div>
+<div class="content"><div class="highlight"><pre><span></span>Copyright (c) 2013-2015 Andrey Antukh &lt;niwi@niwi.nz&gt;
+Copyright (c) 2015-2018 David Barragan &lt;bameda@dbarragan.com&gt;
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. The name of the author may not be used to endorse or promote products
+   derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS&#39;&#39; AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</pre></div></div></div>
 </div>
 </div>
 </div>
@@ -299,7 +365,7 @@ for rendering email in user locale.</p></div>
 <div id="footer-text">
 Version 1.1.0<br>
 Last updated
- 2018-06-06 13:00:51 CEST
+ 2018-06-06 13:02:25 CEST
 </div>
 </div>
 </body>
