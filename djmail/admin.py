@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
@@ -18,7 +14,7 @@ class MessageAdmin(admin.ModelAdmin):
     
     fields = ['subject', 'status', 'from_email', 'to_email', 'body_text', 'body_html_show', 'created_at', 'sent_at']
     
+    @mark_safe
     def body_html_show(self, instance):
-        return mark_safe(instance.body_html)
-    body_html_show.allow_tags = True
+        return instance.body_html
     body_html_show.short_description = "Body html"

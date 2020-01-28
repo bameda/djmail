@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from django.db import models
 
 from . import utils
@@ -53,12 +49,12 @@ class Message(models.Model):
             return 'body_{}'.format('html' if body_type.split('/')[-1] == 'html' else 'text')
 
         kwargs = {
-            "from_email": utils.force_text(email_message.from_email),
-            "to_email": ",".join(utils.force_text(x) for x in email_message.to),
-            "subject": utils.force_text(email_message.subject),
+            "from_email": utils.force_str(email_message.from_email),
+            "to_email": ",".join(utils.force_str(x) for x in email_message.to),
+            "subject": utils.force_str(email_message.subject),
             "data": utils.serialize_email_message(email_message),
             get_body_key(email_message.content_subtype):
-            utils.force_text(email_message.body)
+            utils.force_str(email_message.body)
         }
 
         # Update the body (if missing) from the alternatives
