@@ -1,5 +1,10 @@
 # Changelog #
 
+## 2.0.0 (2020-02-02)
+
+- Djmail doesn't support Python 2.x anymore. (thanks @mhindery)
+- Djmail is compatible only with Django >= 2.0. (thanks @mhindery)
+
 
 ## 1.1.0 (2018-06-06)
 

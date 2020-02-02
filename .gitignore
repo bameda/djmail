@@ -3,6 +3,8 @@
 doc/index.html
 build/
 dist*
+.mypy_cache/
+.env
 /*.egg*
 *.swp
 \#*

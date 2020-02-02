@@ -1,7 +1,7 @@
 djmail documentation
 ====================
 David Barragan, <bameda@dbarragan.com>
-1.1.0, 2018-06-06
+2.0.0, 2020-02-02
 
 :toc:
 :numbered:
@@ -230,7 +230,7 @@ License
 [source,text]
 ----
 Copyright (c) 2013-2015 Andrey Antukh <niwi@niwi.nz>
-Copyright (c) 2015-2018 David Barragan <bameda@dbarragan.com>
+Copyright (c) 2015-2020 David Barragan <bameda@dbarragan.com>
 
 All rights reserved.
 
