@@ -4,7 +4,7 @@ SECRET_KEY = 'p23jof024jf5-94j3f023jf230=fj234fp34fijo'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
     }
 }

@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
 from celery import Celery, shared_task
 
 from . import core, utils
@@ -18,7 +14,7 @@ def send_messages(messages):
     """
     return core._send_messages([
         utils.deserialize_email_message(m)
-        if isinstance(m, utils.string_types) else m for m in messages
+        if isinstance(m, str) else m for m in messages
     ])
 
 

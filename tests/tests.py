@@ -5,15 +5,15 @@ from __future__ import unicode_literals
 import json
 import sys
 from datetime import datetime, timedelta
+from io import StringIO
 
 from django.core import mail
 from django.core.mail import EmailMessage
 from django.core.management import call_command
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils.six import StringIO
 
-from djmail import core, utils, exceptions
+from djmail import core, exceptions, utils
 from djmail.models import Message
 from djmail.template_mail import MagicMailBuilder, TemplateMail, make_email
 

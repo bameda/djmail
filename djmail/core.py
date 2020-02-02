@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import io
 import logging
 import sys
@@ -13,8 +9,6 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 
 from .models import Message
-
-StringIO = io.BytesIO if sys.version_info[0] == 2 else io.StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +35,7 @@ def _safe_send_message(message_model, connection):
     email = message_model.get_email_message()
     sended = 0
 
-    with StringIO() as f:
+    with io.StringIO() as f:
         try:
             sended = connection.send_messages([email])
         except Exception:

@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 import logging
 from contextlib import contextmanager
 
@@ -152,7 +148,7 @@ class MagicMailBuilder(object):
         def _dynamic_email_generator(to, context, priority=Message.PRIORITY_STANDARD, **kwargs):
             lang = None
 
-            if not isinstance(to, utils.string_types):
+            if not isinstance(to, str):
                 if not hasattr(to, self._email_attr):
                     raise AttributeError(
                         "to' parameter does not have '{0._email_attr}' attribute".
