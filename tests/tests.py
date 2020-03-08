@@ -285,7 +285,7 @@ class SerializationEmailTests(EmailTestCaseMixin, TestCase):
 class CleanupManagementCommand(EmailTestCaseMixin, TestCase):
     def setUp(self):
         super(CleanupManagementCommand, self).setUp()
-        # Create a message that was succesfully sent 1 year ago
+        # Create a message that was successfully sent 1 year ago
         self.old_log = Message.from_email_message(self.email)
         self.old_log.status = Message.STATUS_SENT
         self.old_log.sent_at = datetime.now() - timedelta(days=365)
