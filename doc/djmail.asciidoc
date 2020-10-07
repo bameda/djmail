@@ -134,10 +134,10 @@ from djmail import template_mail
 class SomeTemplateEmail(template_mail.TemplateMail):
     name = "some_email"
 
-# Create a instance
+# Create an instance
 email = SomeTemplateEmail()
 
-# Buld and sent message with specified context
+# Build and send message with specified context
 email.send("to@example.com", {"template": "context"})
 ----
 
