@@ -1,9 +1,8 @@
 djmail
 ======
 
-.. image:: https://travis-ci.org/bameda/djmail.svg?branch=master
-    :target: https://travis-ci.org/bameda/djmail
-
+.. image:: https://app.travis-ci.com/bameda/djmail.svg?branch=master
+    :target: https://app.travis-ci.com/bameda/djmail
 
 djmail is a BSD Licensed, simple and nonobstructive django email middleware.
 
