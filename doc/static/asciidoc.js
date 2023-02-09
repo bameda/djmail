@@ -105,7 +105,7 @@ toc: function (toclevels) {
  */
 
 footnotes: function () {
-  // Delete existing footnote entries in case we're reloading the footnodes.
+  // Delete existing footnote entries in case we're reloading the footnotes.
   var i;
   var noteholder = document.getElementById("footnotes");
   if (!noteholder) {

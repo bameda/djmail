@@ -53,7 +53,7 @@ def _safe_send_message(message_model, connection):
 
         message_model.save()
 
-        # Celery backend renturn an AsyncResult object
+        # Celery backend return an AsyncResult object
         return 1 if sended else 0
 
 
